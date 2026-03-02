@@ -1,3 +1,6 @@
+use serde::Serialize;
+
+#[derive(Clone, Serialize)]
 pub enum ProcessStep {
     CheckApiKey,
     EnterSubdomain,

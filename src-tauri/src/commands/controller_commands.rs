@@ -3,7 +3,7 @@ use tauri::Runtime;
 use crate::{api::NexApiClient, services::{controller::Controller, processors::{appointment_slots_processor::AppointmentSlotsProcessor, traits::Processor}}};
 
 #[tauri::command]
-async fn set_processor(processor_name: String, controller: tauri::State<'_, Controller>) -> Result<(), String> {
+pub async fn set_processor(processor_name: String, controller: tauri::State<'_, Controller>) -> Result<(), String> {
     let mut lock = controller.processor.write().map_err(|_| "Lock poisoned")?;
 
     match processor_name.as_str() {
@@ -17,7 +17,7 @@ async fn set_processor(processor_name: String, controller: tauri::State<'_, Cont
 }
 
 #[tauri::command]
-async fn advance_processor(app: tauri::AppHandle, controller: tauri::State<'_, Controller>, client: tauri::State<'_, NexApiClient>) -> Result<(), String> {
+pub async fn advance_processor(app: tauri::AppHandle, controller: tauri::State<'_, Controller>, client: tauri::State<'_, NexApiClient>) -> Result<(), String> {
     let mut lock = controller.processor.write().map_err(|_| "Lock poisoned")?;
     
     if let Some(ref mut processor) = *lock {
@@ -28,7 +28,8 @@ async fn advance_processor(app: tauri::AppHandle, controller: tauri::State<'_, C
     }
 }
 
-async fn update_processor_data(controller: tauri::State<'_, Controller>, data: serde_json::Value) -> Result<(), String> {
+#[tauri::command]
+pub async fn update_processor_data(controller: tauri::State<'_, Controller>, data: serde_json::Value) -> Result<(), String> {
     let mut lock = controller.processor.write().map_err(|_| "Lock poisoned")?;
 
     if let Some(ref mut processor) = *lock {

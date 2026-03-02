@@ -1,6 +1,7 @@
 use serde::Deserialize;
+use tauri::Emitter;
 
-use crate::{api::{NexApiClient, types::{operatories::Operatory, providers::Provider}}, services::processors::{traits::Processor, types::process_steps::ProcessStep}};
+use crate::{api::{NexApiClient, key::get_api_key, types::{operatories::Operatory, providers::Provider}}, services::processors::{traits::Processor, types::process_steps::ProcessStep}};
 
 pub struct AppointmentSlotsProcessor {
     pub current_step: ProcessStep,
@@ -37,17 +38,20 @@ impl Processor for AppointmentSlotsProcessor {
     fn advance(&mut self, client: &NexApiClient, app: &tauri::AppHandle) -> Result<(), Box<dyn std::error::Error>> {
         match self.current_step {
             ProcessStep::CheckApiKey => {
-                
+                if get_api_key()?.is_none() {
+                    return Err("API key is required".into());
+                }
             },
             ProcessStep::EnterSubdomain => {
-                if let Some(_) = self.data.subdomain {
+                let Some(_) = self.data.subdomain else {
                     return Err("Subdomain is required".into());
-                }
+                };
                 self.current_step = ProcessStep::SelectLocations;
-                // app.emit_all("workflow-progress", self.current_step)?;
             },
             _ => {},
         }
+
+        app.emit("processor-step", self.current_step.clone())?;
 
         Ok(())
     }
