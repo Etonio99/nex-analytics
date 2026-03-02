@@ -1,16 +1,15 @@
-use crate::services::processors::traits::Advancement;
+use std::sync::RwLock;
 
-pub struct Controller<T: Advancement> {
-    pub processor: T,
+use crate::services::processors::traits::Processor;
+
+pub struct Controller {
+    pub processor: RwLock<Option<Box<dyn Processor + Send + Sync>>>,
 }
 
-impl<T> Controller<T>
-where
-    T:Advancement
-{
-    pub fn new(processor: T) -> Self {
+impl Controller {
+    pub fn new() -> Self {
         Self {
-            processor,
+            processor: RwLock::new(None),
         }
     }
 }
