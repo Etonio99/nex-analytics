@@ -1,12 +1,11 @@
 use serde::Deserialize;
-use tauri::Emitter;
 
 use crate::{
     api::{
-        key::get_api_key,
         types::{operatories::Operatory, providers::Provider},
         NexApiClient,
     },
+    commands::keys::get_api_key,
     services::processors::{
         traits::Processor,
         types::{process_steps::ProcessStep, processor_advance_result::ProcessorAdvanceResult},
@@ -47,14 +46,21 @@ impl AppointmentSlotsProcessor {
         match self.current_step {
             ProcessStep::CheckApiKey => {
                 if get_api_key()?.is_none() {
-                    return Err("API key is required".into());
+                    return Err("Api key is required".into());
                 }
+                self.current_step = ProcessStep::EnterSubdomain;
             }
             ProcessStep::EnterSubdomain => {
                 let Some(_) = self.data.subdomain else {
                     return Err("Subdomain is required".into());
                 };
                 self.current_step = ProcessStep::SelectLocations;
+            }
+            ProcessStep::SelectLocations => {
+                let Some(_) = self.data.locations.as_ref().filter(|l| !l.is_empty()) else {
+                    return Err("At least one location must be selected".into());
+                };
+                self.current_step = ProcessStep::EnterDays;
             }
             _ => return Ok(false),
         }

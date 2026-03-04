@@ -7,12 +7,12 @@ interface HomeProps {
 }
 
 const Home = (props: HomeProps) => {
-  const { setProcessor } = useProcessor(false);
+  const { setProcessor } = useProcessor();
 
   const click = async () => {
     const response = await setProcessor('appointment_slots');
     console.log(response);
-    props.navigate('check-api-key');
+    props.navigate('process');
   };
 
   return (

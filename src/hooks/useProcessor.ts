@@ -1,7 +1,7 @@
 import { invoke } from '@tauri-apps/api/core';
-import { useEffect } from 'react';
+import { ProcessorAdvanceResult } from '../types/processor-advance-result';
 
-export const useProcessor = (autoAdvance: boolean) => {
+export const useProcessor = () => {
   const setProcessor = async (processorName: string): Promise<boolean> =>
     invoke('set_processor', {
       processorName,
@@ -9,19 +9,21 @@ export const useProcessor = (autoAdvance: boolean) => {
       .then(() => true)
       .catch(() => false);
 
-  const advanceProcessor = async (): Promise<boolean> =>
-    invoke('advance_processor')
+  const advanceProcessor = async (): Promise<
+    ProcessorAdvanceResult | undefined
+  > =>
+    invoke<ProcessorAdvanceResult>('advance_processor')
+      .then((response) => response)
+      .catch(() => undefined);
+
+  const updateProcessorData = async (data: any): Promise<boolean> =>
+    invoke('update_processor_data', data)
       .then(() => true)
       .catch(() => false);
-
-  useEffect(() => {
-    if (autoAdvance) {
-      advanceProcessor();
-    }
-  }, []);
 
   return {
     setProcessor,
     advanceProcessor,
+    updateProcessorData,
   };
 };

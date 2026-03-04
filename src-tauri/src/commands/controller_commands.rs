@@ -3,7 +3,7 @@ use crate::{
     services::{
         controller::Controller,
         processors::{
-            appointment_slots_processor::AppointmentSlotsProcessor, traits::Processor,
+            appointment_slots_processor::AppointmentSlotsProcessor,
             types::processor_advance_result::ProcessorAdvanceResult,
         },
     },

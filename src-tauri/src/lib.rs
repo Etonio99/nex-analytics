@@ -6,14 +6,12 @@ use std::sync::Mutex;
 
 use crate::{
     api::{
-        key::{get_api_key, save_api_key},
-        types::{
+        NexApiClient, types::{
             appointment_slots::AppointmentSlotsResponse, locations::LocationsQuery,
             nex_api::NexApiResponse,
-        },
-        NexApiClient,
+        }
     },
-    commands::controller_commands::{advance_processor, set_processor, update_processor_data},
+    commands::{controller_commands::{advance_processor, set_processor, update_processor_data}, keys::{get_api_key, save_api_key}},
     services::controller::Controller,
     utils::AppData,
 };

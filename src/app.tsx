@@ -9,6 +9,7 @@ import { useRouter } from './hooks/useRouter';
 import Home from './pages/home';
 import CheckApiKey from './pages/check-api-key';
 import FAQ from './pages/faq';
+import Process from './pages/process';
 
 const App = () => {
   const { page, navigate } = useRouter();
@@ -26,8 +27,8 @@ const App = () => {
         return <Home navigate={navigate} />;
       case 'faq':
         return <FAQ />;
-      case 'check-api-key':
-        return <CheckApiKey />;
+      case 'process':
+        return <Process />;
     }
     return null;
   };
