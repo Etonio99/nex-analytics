@@ -1,7 +1,4 @@
-use serde::{
-    Serialize,
-    Deserialize,
-};
+use serde::{Deserialize, Serialize};
 
 use crate::api::types::appointment_types::AppointmentType;
 

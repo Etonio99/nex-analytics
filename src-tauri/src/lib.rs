@@ -6,11 +6,16 @@ use std::sync::Mutex;
 
 use crate::{
     api::{
-        NexApiClient, key::{get_api_key, save_api_key}, types::{
-            appointment_slots::AppointmentSlotsResponse,locations::LocationsQuery,
+        key::{get_api_key, save_api_key},
+        types::{
+            appointment_slots::AppointmentSlotsResponse, locations::LocationsQuery,
             nex_api::NexApiResponse,
-        }
-    }, commands::controller_commands::{advance_processor, set_processor, update_processor_data}, services::controller::Controller, utils::AppData
+        },
+        NexApiClient,
+    },
+    commands::controller_commands::{advance_processor, set_processor, update_processor_data},
+    services::controller::Controller,
+    utils::AppData,
 };
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -33,7 +38,7 @@ pub fn run() {
             get_api_key,
             set_processor,
             advance_processor,
-            update_processor_data,    
+            update_processor_data,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

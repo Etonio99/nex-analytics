@@ -1,10 +1,7 @@
 use reqwest::Method;
 
 use crate::{
-    api::types::locations::InstitutionLocations,
-    LocationsQuery,
-    NexApiClient,
-    NexApiResponse,
+    api::types::locations::InstitutionLocations, LocationsQuery, NexApiClient, NexApiResponse,
 };
 
 impl NexApiClient {

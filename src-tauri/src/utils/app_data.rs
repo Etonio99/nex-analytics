@@ -1,13 +1,6 @@
-use serde::{
-    Deserialize,
-    Serialize
-};
+use serde::{Deserialize, Serialize};
 use std::fs;
-use tauri::{
-    AppHandle,
-    Manager,
-    Runtime
-};
+use tauri::{AppHandle, Manager, Runtime};
 
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
 pub struct AppData {

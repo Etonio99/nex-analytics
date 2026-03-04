@@ -2,9 +2,7 @@ use chrono::NaiveDate;
 use reqwest::Method;
 
 use crate::{
-    api::types::appointment_slots::AppointmentSlotsQuery,
-    AppointmentSlotsResponse,
-    NexApiClient,
+    api::types::appointment_slots::AppointmentSlotsQuery, AppointmentSlotsResponse, NexApiClient,
     NexApiResponse,
 };
 

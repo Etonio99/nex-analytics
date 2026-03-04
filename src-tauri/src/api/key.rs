@@ -9,7 +9,7 @@ pub fn save_api_key(key: String) -> Result<(), String> {
 #[tauri::command]
 pub fn get_api_key() -> Result<Option<String>, String> {
     let entry = Entry::new("nex-analytics", "api_key").map_err(|e| e.to_string())?;
-    
+
     match entry.get_password() {
         Ok(key) => Ok(Some(key)),
         Err(Error::NoEntry) => Ok(None),

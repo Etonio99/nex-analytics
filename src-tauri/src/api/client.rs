@@ -45,7 +45,6 @@ impl NexApiClient {
         request = request.header("Nex-Api-Version", version);
 
         if let Some(q) = query {
-
             request = request.query(q);
         }
 

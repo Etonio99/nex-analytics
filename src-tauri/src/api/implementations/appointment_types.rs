@@ -1,18 +1,14 @@
 use reqwest::Method;
 
 use crate::{
-    NexApiClient,
-    NexApiResponse,
-    api::types::appointment_types::{
-        AppointmentType,
-        AppointmentTypesQuery
-    },
+    api::types::appointment_types::{AppointmentType, AppointmentTypesQuery},
+    NexApiClient, NexApiResponse,
 };
 
 impl NexApiClient {
     pub async fn get_appointment_types(
         &self,
-        query: AppointmentTypesQuery
+        query: AppointmentTypesQuery,
     ) -> Result<NexApiResponse<Vec<AppointmentType>>, String> {
         let response = self
             .request::<Vec<AppointmentType>, (), AppointmentTypesQuery>(

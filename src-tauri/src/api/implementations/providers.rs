@@ -1,12 +1,8 @@
 use reqwest::Method;
 
 use crate::{
-    NexApiClient,
-    NexApiResponse,
-    api::types::providers::{
-        Provider,
-        ProvidersQuery
-    }
+    api::types::providers::{Provider, ProvidersQuery},
+    NexApiClient, NexApiResponse,
 };
 
 impl NexApiClient {

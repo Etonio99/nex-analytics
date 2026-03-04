@@ -1,6 +1,6 @@
 pub mod client;
+pub mod implementations;
 pub mod key;
 pub mod types;
-pub mod implementations;
 
 pub use client::NexApiClient;

@@ -1,7 +1,17 @@
 use serde::Deserialize;
 use tauri::Emitter;
 
-use crate::{api::{NexApiClient, key::get_api_key, types::{operatories::Operatory, providers::Provider}}, services::processors::{traits::Processor, types::{process_steps::ProcessStep, processor_advance_result::ProcessorAdvanceResult}}};
+use crate::{
+    api::{
+        key::get_api_key,
+        types::{operatories::Operatory, providers::Provider},
+        NexApiClient,
+    },
+    services::processors::{
+        traits::Processor,
+        types::{process_steps::ProcessStep, processor_advance_result::ProcessorAdvanceResult},
+    },
+};
 
 pub struct AppointmentSlotsProcessor {
     pub current_step: ProcessStep,
@@ -29,7 +39,7 @@ impl AppointmentSlotsProcessor {
                 appointment_type_id: None,
                 operatories: None,
                 providers: None,
-            }
+            },
         }
     }
 
@@ -39,13 +49,13 @@ impl AppointmentSlotsProcessor {
                 if get_api_key()?.is_none() {
                     return Err("API key is required".into());
                 }
-            },
+            }
             ProcessStep::EnterSubdomain => {
                 let Some(_) = self.data.subdomain else {
                     return Err("Subdomain is required".into());
                 };
                 self.current_step = ProcessStep::SelectLocations;
-            },
+            }
             _ => return Ok(false),
         }
 
@@ -54,7 +64,11 @@ impl AppointmentSlotsProcessor {
 }
 
 impl Processor for AppointmentSlotsProcessor {
-    fn advance(&mut self, client: &NexApiClient, app: &tauri::AppHandle) -> Result<ProcessorAdvanceResult, String> {
+    fn advance(
+        &mut self,
+        client: &NexApiClient,
+        app: &tauri::AppHandle,
+    ) -> Result<ProcessorAdvanceResult, String> {
         let mut error = None;
 
         loop {
@@ -64,7 +78,7 @@ impl Processor for AppointmentSlotsProcessor {
                 Err(e) => {
                     error = Some(e);
                     break;
-                },
+                }
             }
         }
 
@@ -78,13 +92,25 @@ impl Processor for AppointmentSlotsProcessor {
         let input: AppointmentSlotsProcessorData = serde_json::from_value(data)
             .map_err(|e| format!("Invalid data for Appointment Slots Processor: {}", e))?;
 
-        if let Some(s) = input.subdomain { self.data.subdomain = Some(s); }
-        if let Some(l) = input.locations { self.data.locations = Some(l); }
-        if let Some(d) = input.days { self.data.days = Some(d); }
-        if let Some(a) = input.appointment_type_id { self.data.appointment_type_id = Some(a); }
-        if let Some(o) = input.operatories { self.data.operatories = Some(o); }
-        if let Some(p) = input.providers { self.data.providers = Some(p); }
-        
+        if let Some(s) = input.subdomain {
+            self.data.subdomain = Some(s);
+        }
+        if let Some(l) = input.locations {
+            self.data.locations = Some(l);
+        }
+        if let Some(d) = input.days {
+            self.data.days = Some(d);
+        }
+        if let Some(a) = input.appointment_type_id {
+            self.data.appointment_type_id = Some(a);
+        }
+        if let Some(o) = input.operatories {
+            self.data.operatories = Some(o);
+        }
+        if let Some(p) = input.providers {
+            self.data.providers = Some(p);
+        }
+
         Ok(())
     }
 }

@@ -1,7 +1,4 @@
-use serde::{
-    Serialize,
-    Deserialize,
-};
+use serde::{Deserialize, Serialize};
 
 use crate::api::types::{availabilities::Availability, bio::Bio, locations::Location};
 
@@ -42,5 +39,5 @@ pub struct Provider {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ProviderRequestable {
-    pub location_id: u32
+    pub location_id: u32,
 }

@@ -40,7 +40,9 @@ pub struct AppointmentSlotsQuery {
 }
 
 pub fn serialize_pids<S>(ids: &[u32], serializer: S) -> Result<S::Ok, S::Error>
-where S: Serializer {
+where
+    S: Serializer,
+{
     let joined = ids
         .iter()
         .map(|id| id.to_string())
