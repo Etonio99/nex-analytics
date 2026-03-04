@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 
 export const useRouter = () => {
-  const [page, setPage] = useState(window.location.hash.replace('#', '') || 'home');
+  const [page, setPage] = useState(
+    window.location.hash.replace('#', '') || 'home'
+  );
 
   useEffect(() => {
     const handleHashChange = () => {
@@ -17,4 +19,4 @@ export const useRouter = () => {
   };
 
   return { page, navigate };
-}
+};

@@ -1,36 +1,36 @@
-import "./css/app.css";
-import LoadingIndicator from "./components/loading-indicator";
-import { invoke } from "@tauri-apps/api/core";
-import Accordion from "./components/accordion";
-import { BiError, BiHomeSmile } from "react-icons/bi";
-import MultiSelect from "./components/multi-select";
-import Button from "./components/button";
-import { useRouter } from "./hooks/useRouter";
-import Home from "./pages/home";
-import CheckApiKey from "./pages/check-api-key";
-import FAQ from "./pages/faq";
+import './css/app.css';
+import LoadingIndicator from './components/loading-indicator';
+import { invoke } from '@tauri-apps/api/core';
+import Accordion from './components/accordion';
+import { BiError, BiHomeSmile } from 'react-icons/bi';
+import MultiSelect from './components/multi-select';
+import Button from './components/button';
+import { useRouter } from './hooks/useRouter';
+import Home from './pages/home';
+import CheckApiKey from './pages/check-api-key';
+import FAQ from './pages/faq';
 
 const App = () => {
   const { page, navigate } = useRouter();
 
   const test = async () => {
-    const response = await invoke("test");
+    const response = await invoke('test');
     console.log(response);
-  }
+  };
 
   console.log(page);
 
   const getPage = (pageName: string) => {
     switch (pageName) {
-      case "home":
+      case 'home':
         return <Home navigate={navigate} />;
-      case "faq":
-        return <FAQ />
-      case "check-api-key":
+      case 'faq':
+        return <FAQ />;
+      case 'check-api-key':
         return <CheckApiKey />;
     }
     return null;
-  }
+  };
 
   return (
     <main className="h-screen bg-sandstone-50 p-4">
@@ -91,6 +91,6 @@ const App = () => {
       ]} /> */}
     </main>
   );
-}
+};
 
 export default App;
