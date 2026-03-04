@@ -22,7 +22,7 @@ interface ButtonProps {
   style: ButtonStyle;
   icon?: React.ReactNode;
   disabled?: boolean;
-  onClick?: () => any;
+  onClick?: () => void;
 }
 
 const Button = (props: ButtonProps) => {
