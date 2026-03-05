@@ -2,5 +2,5 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 fn main() {
-    nex_available_slots_report_lib::run()
+    nex_analytics_lib::run()
 }

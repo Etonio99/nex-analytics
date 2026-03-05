@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "nex-available-slots-report",
+  "productName": "nex-analytics",
   "version": "0.1.0",
-  "identifier": "com.ebrei.nex-available-slots-report",
+  "identifier": "com.ebrei.nex-analytics",
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:1420",
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "nex-available-slots-report",
+        "title": "Nex Analytics",
         "width": 800,
         "height": 600
       }
