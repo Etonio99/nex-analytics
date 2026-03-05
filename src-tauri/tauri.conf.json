@@ -14,7 +14,8 @@
       {
         "title": "Nex Analytics",
         "width": 800,
-        "height": 600
+        "height": 600,
+        "backgroundColor": "#fffceb"
       }
     ],
     "security": {

@@ -1,24 +1,27 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 @theme {
-    --color-sandstone-50: #fffceb;
-    --color-sandstone-100: #fff7cc;
-    --color-sandstone-200: #e6d3a6;
-    --color-sandstone-300: #c4ae82;
-    --color-sandstone-400: #9a7b53;
-    --color-sandstone-500: #826141;
-    --color-sandstone-600: #6c4930;
-    --color-sandstone-700: #593824;
-    --color-sandstone-800: #47291a;
-    --color-sandstone-900: #331a17;
-    --color-sandstone-950: #1f0d0a;
+  --color-sandstone-50: #fffceb;
+  --color-sandstone-100: #fff7cc;
+  --color-sandstone-200: #e6d3a6;
+  --color-sandstone-300: #c4ae82;
+  --color-sandstone-400: #9a7b53;
+  --color-sandstone-500: #826141;
+  --color-sandstone-600: #6c4930;
+  --color-sandstone-700: #593824;
+  --color-sandstone-800: #47291a;
+  --color-sandstone-900: #331a17;
+  --color-sandstone-950: #1f0d0a;
 }
 
+html,
 body {
-    font-family: system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-    @apply accent-sandstone-700;
+  font-family:
+    system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif,
+    'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+  @apply bg-sandstone-50 accent-sandstone-700;
 }
 
 .pixelated {
-    image-rendering: pixelated;
+  image-rendering: pixelated;
 }

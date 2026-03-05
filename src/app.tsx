@@ -20,7 +20,7 @@ const App = () => {
   };
 
   return (
-    <main className="h-screen bg-sandstone-50 p-4">
+    <main className="h-screen p-4">
       {getPage(page)}
       {/* {page !== "test" && <button onClick={() => navigate("test")}>Test</button>}
       {page !== "home" && <button onClick={() => navigate("home")}>Home</button>} */}
