@@ -1,10 +1,13 @@
+use async_trait::async_trait;
+
 use crate::{
     api::NexApiClient,
     services::processors::types::processor_advance_result::ProcessorAdvanceResult,
 };
 
-pub trait Processor {
-    fn advance(
+#[async_trait]
+pub trait Processor: Send + Sync {
+    async fn advance(
         &mut self,
         client: &NexApiClient,
         app: &tauri::AppHandle,

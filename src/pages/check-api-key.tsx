@@ -1,26 +1,51 @@
+import { useState } from 'react';
 import Button from '../components/button';
 import useApiKey from '../hooks/useApiKey';
+import ProcessorSubPage from './layout/processor-sub-page';
+import Input from '../components/input';
+import { BiSolidKey } from 'react-icons/bi';
+import { ProcessSubPageProps } from '../types/process-sub-page-props';
+import { errorMessages } from '../types/processor-error';
 
-interface CheckApiKeyProps {
-  advance: () => Promise<boolean>;
-  update: (data: never) => Promise<boolean>;
-}
+const CheckApiKey = (props: ProcessSubPageProps) => {
+  const [apiKeyInput, setApiKeyInput] = useState<string>('');
 
-const CheckApiKey = (props: CheckApiKeyProps) => {
   const { setApiKey } = useApiKey();
 
-  const update = () => {
-    setApiKey('test');
+  const continueProcess = async () => {
+    if (!apiKeyInput) {
+      return;
+    }
+
+    await setApiKey(apiKeyInput);
+    props.advance();
   };
 
   return (
-    <div className="max-w-xl m-auto">
-      <h1 className="text-4xl font-bold mb-4 text-sandstone-300">
-        Check API Key
-      </h1>
-      <Button label="Test Key" style="secondary" onClick={update} />
-      <Button label="Continue" style="primary" onClick={props.advance} />
-    </div>
+    <ProcessorSubPage title="Check API Key">
+      <Input
+        label="API Key"
+        placeholder="hjsddgf849fds.dsa..."
+        icon={<BiSolidKey />}
+        value={apiKeyInput}
+        onChange={(e) => setApiKeyInput(e.target.value)}
+      />
+      <div className="mt-2 flex justify-end items-center gap-2">
+        <p className="text-sandstone-300 italic">
+          Your API key will be stored securely on your machine for reuse.
+        </p>
+        <Button label="Save" style="primary" onClick={continueProcess} />
+      </div>
+      {props.advanceResult && (
+        <p className="text-red-400 w-full text-center">
+          {
+            errorMessages[
+              props.advanceResult.error?.type as keyof typeof errorMessages
+            ]
+          }
+        </p>
+      )}
+    </ProcessorSubPage>
   );
 };
 

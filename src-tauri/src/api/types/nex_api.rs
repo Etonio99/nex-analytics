@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 pub struct NexApiResponse<T> {
     pub code: bool,
     pub data: Option<T>,
-    pub description: Option<Vec<String>>,
+    pub description: Option<String>,
     pub error: Option<Vec<String>>,
     pub count: Option<u64>,
 }

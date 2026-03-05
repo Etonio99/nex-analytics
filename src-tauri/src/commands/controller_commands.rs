@@ -10,11 +10,11 @@ use crate::{
 };
 
 #[tauri::command]
-pub fn set_processor(
+pub async fn set_processor(
     controller: tauri::State<'_, Controller>,
     processor_name: String,
 ) -> Result<(), String> {
-    let mut guard = controller.processor.lock().unwrap();
+    let mut guard = controller.processor.lock().await;
 
     match processor_name.as_str() {
         "appointment_slots" => {
@@ -27,24 +27,24 @@ pub fn set_processor(
 }
 
 #[tauri::command]
-pub fn advance_processor(
+pub async fn advance_processor(
     app: tauri::AppHandle,
     controller: tauri::State<'_, Controller>,
     client: tauri::State<'_, NexApiClient>,
 ) -> Result<ProcessorAdvanceResult, String> {
-    let mut guard = controller.processor.lock().unwrap();
+    let mut guard = controller.processor.lock().await;
 
     let processor = guard.as_mut().ok_or("No processor selected")?;
 
-    processor.advance(&client, &app)
+    processor.advance(&client, &app).await
 }
 
 #[tauri::command]
-pub fn update_processor_data(
+pub async fn update_processor_data(
     controller: tauri::State<'_, Controller>,
     data: serde_json::Value,
 ) -> Result<(), String> {
-    let mut guard = controller.processor.lock().unwrap();
+    let mut guard = controller.processor.lock().await;
 
     if let Some(ref mut processor) = *guard {
         processor.update_data(data)

@@ -40,7 +40,13 @@ const Process = () => {
 
     switch (stepName) {
       case 'CheckApiKey':
-        return <CheckApiKey advance={advance} update={update} />;
+        return (
+          <CheckApiKey
+            advance={advance}
+            update={update}
+            advanceResult={advanceResult}
+          />
+        );
     }
   };
 

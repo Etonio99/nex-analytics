@@ -18,7 +18,7 @@ use crate::{
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    let client = NexApiClient::new(Some("eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM1Iiwic2NwIjoiYXBpX3VzZXIiLCJpYXQiOjE3NzIyNTI0ODUsImV4cCI6MTc3MjI1NjA4NSwianRpIjoiM2IzMGUwM2YtMDhhNy00YmRjLWExYTAtMTQ0ZGE0ODIwYjE3In0.9-IAk1LNioY5CSuvrvB0c4VdNkE6egnPP_qeiYKNSkY".into()));
+    let client = NexApiClient::new();
     let app_data = Mutex::new(AppData {
         location_ids: vec![],
         excluded_location_ids: vec![],

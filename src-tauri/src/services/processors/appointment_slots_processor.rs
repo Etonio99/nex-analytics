@@ -1,14 +1,16 @@
+use std::f32::consts::E;
+
+use async_trait::async_trait;
 use serde::Deserialize;
 
 use crate::{
     api::{
-        types::{operatories::Operatory, providers::Provider},
-        NexApiClient,
+        NexApiClient, types::{operatories::Operatory, providers::Provider}
     },
     commands::keys::get_api_key,
     services::processors::{
         traits::Processor,
-        types::{process_steps::ProcessStep, processor_advance_result::ProcessorAdvanceResult},
+        types::{process_steps::ProcessStep, processor_advance_result::ProcessorAdvanceResult, processor_error::ProcessorError},
     },
 };
 
@@ -42,23 +44,30 @@ impl AppointmentSlotsProcessor {
         }
     }
 
-    fn step(&mut self, client: &NexApiClient, app: &tauri::AppHandle) -> Result<bool, String> {
+    async fn step(&mut self, client: &NexApiClient, app: &tauri::AppHandle) -> Result<bool, ProcessorError> {
         match self.current_step {
             ProcessStep::CheckApiKey => {
-                if get_api_key()?.is_none() {
-                    return Err("Api key is required".into());
+                // if get_api_key()?.is_none() {
+                if get_api_key().map_err(|e| ProcessorError::InternalError(e.to_string()))?.is_none() {
+                    return Err(ProcessorError::MissingApiKey);
                 }
+
+                let response = client.get_authenticates().await.map_err(|e| ProcessorError::InternalError(e.to_string()))?;
+                if !response.code {
+                    return Err(ProcessorError::InvalidApiKey);
+                }
+
                 self.current_step = ProcessStep::EnterSubdomain;
             }
             ProcessStep::EnterSubdomain => {
                 let Some(_) = self.data.subdomain else {
-                    return Err("Subdomain is required".into());
+                    return Err(ProcessorError::MissingSubdomain);
                 };
                 self.current_step = ProcessStep::SelectLocations;
             }
             ProcessStep::SelectLocations => {
                 let Some(_) = self.data.locations.as_ref().filter(|l| !l.is_empty()) else {
-                    return Err("At least one location must be selected".into());
+                    return Err(ProcessorError::LocationRequired);
                 };
                 self.current_step = ProcessStep::EnterDays;
             }
@@ -69,8 +78,9 @@ impl AppointmentSlotsProcessor {
     }
 }
 
+#[async_trait]
 impl Processor for AppointmentSlotsProcessor {
-    fn advance(
+    async fn advance(
         &mut self,
         client: &NexApiClient,
         app: &tauri::AppHandle,
@@ -78,7 +88,7 @@ impl Processor for AppointmentSlotsProcessor {
         let mut error = None;
 
         loop {
-            match self.step(client, app) {
+            match self.step(client, app).await {
                 Ok(true) => continue,
                 Ok(false) => break,
                 Err(e) => {

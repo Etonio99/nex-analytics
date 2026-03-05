@@ -1,6 +1,7 @@
+import { ProcessorError } from './processor-error';
 import { ProcessStep } from './processor-steps';
 
 export type ProcessorAdvanceResult = {
   step: ProcessStep;
-  error: string | null;
+  error: ProcessorError | null;
 };

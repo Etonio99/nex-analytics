@@ -1,18 +1,16 @@
-use crate::NexApiResponse;
+use crate::{NexApiResponse, commands::keys::get_api_key};
 use reqwest::{Client, Method};
 use serde::{de::DeserializeOwned, Serialize};
 
 pub struct NexApiClient {
     client: Client,
-    token: Option<String>,
     base_url: String,
 }
 
 impl NexApiClient {
-    pub fn new(token: Option<String>) -> Self {
+    pub fn new() -> Self {
         Self {
             client: Client::new(),
-            token,
             base_url: "https://nexhealth.info/".into(),
         }
     }
@@ -33,11 +31,10 @@ impl NexApiClient {
         let url = format!("{}{}", self.base_url.trim(), path.trim());
         let mut request = self.client.request(method, &url);
 
-        if let Some(token) = &self.token {
-            let trimmed_token: String = token.trim().to_string();
-            let auth_value = format!("Bearer {}", trimmed_token);
-            request = request.header("Authorization", &auth_value);
-        }
+        let key_response = get_api_key().expect("No api key is saved for the client to use").unwrap();
+
+        let trimmed_token: String = key_response.trim().to_string();
+        request = request.header("Authorization", &trimmed_token);
 
         request = request.header("Content-Type", "application/json");
 

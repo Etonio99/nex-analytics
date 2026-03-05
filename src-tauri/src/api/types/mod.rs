@@ -1,5 +1,6 @@
 pub mod appointment_slots;
 pub mod appointment_types;
+pub mod authenticates;
 pub mod availabilities;
 pub mod bio;
 pub mod locations;
