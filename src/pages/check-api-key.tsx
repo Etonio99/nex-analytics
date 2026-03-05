@@ -1,5 +1,5 @@
 import Button from '../components/button';
-import useApiKey from '../hooks/useKey';
+import useApiKey from '../hooks/useApiKey';
 
 interface CheckApiKeyProps {
   advance: () => Promise<boolean>;
