@@ -8,6 +8,14 @@ import { useProcessor } from '../hooks/useProcessor';
 import { ProcessStep } from '../types/processor-steps';
 import EnterSubdomain from './processor-sub-pages/enter-subdomain';
 import { ProcessorDataUpdate } from '../types/processor-data-update';
+import { useAppState } from '../hooks/useAppState';
+import { AppData } from '../types/app-data';
+
+export type AppActions = {
+  advanceProcessor: () => Promise<boolean>;
+  updateProcessorData: (data: ProcessorDataUpdate) => Promise<boolean>;
+  updateAppData: (data: AppData) => Promise<boolean>;
+};
 
 const Process = () => {
   const [advanceResult, setAdvanceResult] = useState<
@@ -15,6 +23,7 @@ const Process = () => {
   >(undefined);
 
   const { advanceProcessor, updateProcessorData } = useProcessor();
+  const { updateAppData } = useAppState();
 
   const advance = async (): Promise<boolean> => {
     try {
@@ -28,12 +37,15 @@ const Process = () => {
     }
   };
 
-  const update = async (data: ProcessorDataUpdate): Promise<boolean> =>
-    updateProcessorData(data);
-
   useEffect(() => {
     advance();
   }, []);
+
+  const appActions: AppActions = {
+    advanceProcessor: advance,
+    updateProcessorData,
+    updateAppData,
+  };
 
   const getPage = (stepName: ProcessStep | undefined) => {
     if (!stepName) {
@@ -43,17 +55,12 @@ const Process = () => {
     switch (stepName) {
       case 'CheckApiKey':
         return (
-          <CheckApiKey
-            advance={advance}
-            update={update}
-            advanceResult={advanceResult}
-          />
+          <CheckApiKey appActions={appActions} advanceResult={advanceResult} />
         );
       case 'EnterSubdomain':
         return (
           <EnterSubdomain
-            advance={advance}
-            update={update}
+            appActions={appActions}
             advanceResult={advanceResult}
           />
         );

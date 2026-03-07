@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import Button from '../../components/button';
-import ProcessorSubPage from '../layout/processor-sub-page';
+import ProcessorSubPage from './processor-sub-page';
 import Input from '../../components/input';
 import { BiBuildings } from 'react-icons/bi';
 import { ProcessSubPageProps } from '../../types/process-sub-page-props';
@@ -14,8 +14,8 @@ const EnterSubdomain = (props: ProcessSubPageProps) => {
       return;
     }
 
-    await props.update({ subdomain: subdomainInput });
-    props.advance();
+    await props.appActions.updateAppData({ subdomain: subdomainInput });
+    props.appActions.advanceProcessor();
   };
 
   return (

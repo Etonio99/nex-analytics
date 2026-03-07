@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import Button from '../../components/button';
 import useApiKey from '../../hooks/useApiKey';
-import ProcessorSubPage from '../layout/processor-sub-page';
+import ProcessorSubPage from './processor-sub-page';
 import Input from '../../components/input';
 import { BiSolidKey } from 'react-icons/bi';
 import { ProcessSubPageProps } from '../../types/process-sub-page-props';
@@ -18,7 +18,7 @@ const CheckApiKey = (props: ProcessSubPageProps) => {
     }
 
     await setApiKey(apiKeyInput);
-    props.advance();
+    props.appActions.advanceProcessor();
   };
 
   return (

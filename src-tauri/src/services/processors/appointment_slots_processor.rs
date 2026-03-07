@@ -1,20 +1,26 @@
-use std::f32::consts::E;
+use std::sync::Arc;
 
 use async_trait::async_trait;
 use serde::Deserialize;
 
 use crate::{
     api::{
-        NexApiClient, types::{operatories::Operatory, providers::Provider}
+        types::{operatories::Operatory, providers::Provider},
+        NexApiClient,
     },
     commands::keys::get_api_key,
     services::processors::{
         traits::Processor,
-        types::{process_steps::ProcessStep, processor_advance_result::ProcessorAdvanceResult, processor_error::ProcessorError},
+        types::{
+            process_steps::ProcessStep, processor_advance_result::ProcessorAdvanceResult,
+            processor_error::ProcessorError,
+        },
     },
+    utils::app_state::{self, AppState},
 };
 
 pub struct AppointmentSlotsProcessor {
+    pub app_state: Arc<AppState>,
     pub current_step: ProcessStep,
     pub data: AppointmentSlotsProcessorData,
 }
@@ -29,8 +35,9 @@ pub struct AppointmentSlotsProcessorData {
 }
 
 impl AppointmentSlotsProcessor {
-    pub fn new() -> Self {
+    pub fn new(app_state: Arc<AppState>) -> Self {
         Self {
+            app_state,
             current_step: ProcessStep::CheckApiKey,
             data: AppointmentSlotsProcessorData {
                 locations: None,
@@ -42,15 +49,25 @@ impl AppointmentSlotsProcessor {
         }
     }
 
-    async fn step(&mut self, client: &NexApiClient, app: &tauri::AppHandle) -> Result<bool, ProcessorError> {
+    async fn step(
+        &mut self,
+        client: &NexApiClient,
+        app: &tauri::AppHandle,
+    ) -> Result<bool, ProcessorError> {
         match self.current_step {
             ProcessStep::CheckApiKey => {
                 // if get_api_key()?.is_none() {
-                if get_api_key().map_err(|e| ProcessorError::InternalError(e.to_string()))?.is_none() {
+                if get_api_key()
+                    .map_err(|e| ProcessorError::InternalError(e.to_string()))?
+                    .is_none()
+                {
                     return Err(ProcessorError::MissingApiKey);
                 }
 
-                let response = client.get_authenticates().await.map_err(|e| ProcessorError::InternalError(e.to_string()))?;
+                let response = client
+                    .get_authenticates()
+                    .await
+                    .map_err(|e| ProcessorError::InternalError(e.to_string()))?;
                 if !response.code {
                     return Err(ProcessorError::InvalidApiKey);
                 }
@@ -58,9 +75,13 @@ impl AppointmentSlotsProcessor {
                 self.current_step = ProcessStep::EnterSubdomain;
             }
             ProcessStep::EnterSubdomain => {
-                let Some(_) = self.data.subdomain else {
-                    return Err(ProcessorError::MissingSubdomain);
-                };
+                let guard = self.app_state.data.lock().await;
+
+                let _ = guard
+                    .subdomain
+                    .as_ref()
+                    .ok_or(ProcessorError::MissingSubdomain)?;
+
                 self.current_step = ProcessStep::SelectLocations;
             }
             ProcessStep::SelectLocations => {
@@ -106,9 +127,6 @@ impl Processor for AppointmentSlotsProcessor {
         let input: AppointmentSlotsProcessorData = serde_json::from_value(data)
             .map_err(|e| format!("Invalid data for Appointment Slots Processor: {}", e))?;
 
-        if let Some(s) = input.subdomain {
-            self.data.subdomain = Some(s.clone());
-        }
         if let Some(l) = input.locations {
             self.data.locations = Some(l);
         }
