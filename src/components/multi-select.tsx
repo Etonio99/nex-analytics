@@ -1,5 +1,3 @@
-import { useEffect, useState } from 'react';
-
 export type MultiSelectItem = {
   label: string;
   description: string;
@@ -11,37 +9,22 @@ interface MultiSelectProps {
   title: string;
   description?: string;
   items: MultiSelectItem[];
-  onChange?: (state: Record<string, boolean>) => void;
+  value: Record<string, boolean>;
+  onChange: (state: Record<string, boolean>) => void;
 }
 
 const MultiSelect = (props: MultiSelectProps) => {
-  const [keyState, setKeyState] = useState<Record<string, boolean>>({});
-
-  useEffect(() => {
-    const initializeKeyState = () => {
-      const newState: Record<string, boolean> = {};
-      for (const item of props.items) {
-        newState[item.uniqueKey] = item.checked ?? false;
-      }
-      setKeyState(newState);
-      props.onChange?.(newState);
-    };
-
-    initializeKeyState();
-  }, []);
-
   const handleChange = (key: string | number) => {
     if (!key) {
       console.error('handleChange called with invalid key:', key);
       return;
     }
 
-    setKeyState((previous) => ({
-      ...previous,
-      [key]: !previous[key],
-    }));
-
-    console.log(keyState);
+    const newState = {
+      ...props.value,
+      [key]: !props.value[key],
+    };
+    props.onChange(newState);
   };
 
   return (
@@ -60,7 +43,7 @@ const MultiSelect = (props: MultiSelectProps) => {
               uniqueKey={item.uniqueKey}
               label={item.label}
               description={item.description}
-              checked={keyState[item.uniqueKey] ?? false}
+              checked={!!props.value[item.uniqueKey]}
               onChange={handleChange}
             />
           ))}

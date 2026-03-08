@@ -1,7 +1,12 @@
 import MultiSelect, { MultiSelectItem } from '../../../components/multi-select';
 import { useLocations } from '../../../hooks/useLocations';
 
-const LocationSelect = () => {
+interface LocationSelectProps {
+  value: Record<string, boolean>;
+  onChange: (state: Record<string, boolean>) => void;
+}
+
+const LocationSelect = (props: LocationSelectProps) => {
   const { data } = useLocations();
 
   if (!data?.data || data.data.length < 1) {
@@ -13,6 +18,8 @@ const LocationSelect = () => {
   return (
     <MultiSelect
       title="Select Locations"
+      value={props.value}
+      onChange={props.onChange}
       items={locationData.locations.map((location) => {
         const addressParts = [];
         if (location.street_address) addressParts.push(location.street_address);
