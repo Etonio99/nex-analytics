@@ -10,6 +10,7 @@ import EnterSubdomain from './processor-sub-pages/enter-subdomain';
 import { ProcessorDataUpdate } from '../types/processor-data-update';
 import { useAppState } from '../hooks/useAppState';
 import { AppData } from '../types/app-data';
+import SelectLocations from './processor-sub-pages/select-locations';
 
 export type AppActions = {
   advanceProcessor: () => Promise<boolean>;
@@ -60,6 +61,13 @@ const Process = () => {
       case 'EnterSubdomain':
         return (
           <EnterSubdomain
+            appActions={appActions}
+            advanceResult={advanceResult}
+          />
+        );
+      case 'SelectLocations':
+        return (
+          <SelectLocations
             appActions={appActions}
             advanceResult={advanceResult}
           />

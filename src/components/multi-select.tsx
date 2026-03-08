@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 export type MultiSelectItem = {
   label: string;
   description: string;
-  uniqueKey: string;
+  uniqueKey: string | number;
   checked?: boolean;
 };
 
@@ -28,7 +28,7 @@ const MultiSelect = (props: MultiSelectProps) => {
     initializeKeyState();
   }, []);
 
-  const handleChange = (key: string) => {
+  const handleChange = (key: string | number) => {
     if (!key) {
       console.error('handleChange called with invalid key:', key);
       return;
@@ -73,9 +73,9 @@ const MultiSelect = (props: MultiSelectProps) => {
 interface MultiSelectItemProps {
   label: string;
   description: string;
-  uniqueKey: string;
+  uniqueKey: string | number;
   checked: boolean;
-  onChange: (key: string) => void;
+  onChange: (key: string | number) => void;
 }
 
 const MultiSelectItem = (props: MultiSelectItemProps) => {
@@ -97,7 +97,12 @@ const MultiSelectItem = (props: MultiSelectItemProps) => {
         />
       </div>
       <div className="pl-2">
-        <p className="relative top-0.5">{props.label}</p>
+        {props.label !== '' && (
+          <p className="relative top-0.5">{props.label}</p>
+        )}
+        {(props.label === '' || !props.label) && (
+          <p className="relative top-0.5 opacity-75 italic">Unnamed</p>
+        )}
         <p className="text-sandstone-300 relative bottom-0.5">
           {props.description}
         </p>
