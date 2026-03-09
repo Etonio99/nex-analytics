@@ -13,7 +13,7 @@ const SelectLocations = (props: ProcessSubPageProps) => {
     const location_ids = Object.entries(locationSelection)
       .filter(([_, selected]) => selected)
       .map(([id, _]) => parseInt(id));
-    await props.appActions.updateAppData({ location_ids });
+    await props.appActions.updateProcessorData({ location_ids });
     props.appActions.advanceProcessor();
   };
 

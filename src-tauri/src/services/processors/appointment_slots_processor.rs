@@ -28,7 +28,7 @@ pub struct AppointmentSlotsProcessor {
 
 #[derive(Debug, Deserialize)]
 pub struct AppointmentSlotsProcessorData {
-    pub locations: Option<Vec<u32>>,
+    pub location_ids: Option<Vec<u32>>,
     pub days: Option<u32>,
     pub appointment_type_id: Option<u32>,
     pub operatories: Option<Vec<Operatory>>,
@@ -41,7 +41,7 @@ impl AppointmentSlotsProcessor {
             app_state,
             current_step: ProcessStep::CheckApiKey,
             data: AppointmentSlotsProcessorData {
-                locations: None,
+                location_ids: None,
                 days: None,
                 appointment_type_id: None,
                 operatories: None,
@@ -57,7 +57,6 @@ impl AppointmentSlotsProcessor {
     ) -> Result<bool, ProcessorError> {
         match self.current_step {
             ProcessStep::CheckApiKey => {
-                // if get_api_key()?.is_none() {
                 if get_api_key()
                     .map_err(|e| {
                         ProcessorError::InternalError(ErrorResolutionData::Message(e.to_string()))
@@ -87,7 +86,7 @@ impl AppointmentSlotsProcessor {
                 self.current_step = ProcessStep::SelectLocations;
             }
             ProcessStep::SelectLocations => {
-                let Some(_) = self.data.locations.as_ref().filter(|l| !l.is_empty()) else {
+                let Some(_) = self.data.location_ids.as_ref().filter(|l| !l.is_empty()) else {
                     let guard = self.app_state.data.lock().await;
 
                     let subdomain = guard
@@ -120,6 +119,12 @@ impl AppointmentSlotsProcessor {
                     };
                 };
                 self.current_step = ProcessStep::EnterDays;
+            }
+            ProcessStep::EnterDays => {
+                let Some(_) = self.data.days else {
+                    return Err(ProcessorError::MissingDays);
+                };
+                self.current_step = ProcessStep::SelectLocations;
             }
             _ => return Ok(false),
         }
@@ -158,8 +163,8 @@ impl Processor for AppointmentSlotsProcessor {
         let input: AppointmentSlotsProcessorData = serde_json::from_value(data)
             .map_err(|e| format!("Invalid data for Appointment Slots Processor: {}", e))?;
 
-        if let Some(l) = input.locations {
-            self.data.locations = Some(l);
+        if let Some(l) = input.location_ids {
+            self.data.location_ids = Some(l);
         }
         if let Some(d) = input.days {
             self.data.days = Some(d);
