@@ -13,6 +13,7 @@ pub enum ProcessorError {
     InvalidApiKey,
     MissingSubdomain,
     LocationRequired(ErrorResolutionData),
+    NoLocationsFound,
     MissingDays,
     InternalError(ErrorResolutionData),
 }

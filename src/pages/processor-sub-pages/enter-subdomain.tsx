@@ -15,7 +15,7 @@ const EnterSubdomain = (props: ProcessSubPageProps) => {
     }
 
     await props.appActions.updateAppData({ subdomain: subdomainInput });
-    props.appActions.advanceProcessor();
+    await props.appActions.advanceProcessor();
   };
 
   return (

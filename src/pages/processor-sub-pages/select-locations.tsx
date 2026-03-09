@@ -10,11 +10,11 @@ const SelectLocations = (props: ProcessSubPageProps) => {
   >({});
 
   const continueProcess = async () => {
-    const location_ids = Object.entries(locationSelection)
+    const selected_location_ids = Object.entries(locationSelection)
       .filter(([_, selected]) => selected)
       .map(([id, _]) => parseInt(id));
-    await props.appActions.updateProcessorData({ location_ids });
-    props.appActions.advanceProcessor();
+    await props.appActions.updateProcessorData({ selected_location_ids });
+    await props.appActions.advanceProcessor();
   };
 
   const locations =

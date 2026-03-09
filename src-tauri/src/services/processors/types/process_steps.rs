@@ -4,6 +4,7 @@ use serde::Serialize;
 pub enum ProcessStep {
     CheckApiKey,
     EnterSubdomain,
+    FetchLocations,
     SelectLocations,
     SelectAppointmentType,
     EnterDays,

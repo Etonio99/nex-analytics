@@ -1,4 +1,4 @@
 export type ProcessorDataUpdate = {
   subdomain?: string;
-  location_ids?: number[];
+  selected_location_ids?: number[];
 };

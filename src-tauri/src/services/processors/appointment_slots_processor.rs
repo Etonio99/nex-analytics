@@ -5,7 +5,12 @@ use serde::Deserialize;
 
 use crate::{
     api::{
-        types::{locations::LocationsQuery, operatories::Operatory, providers::Provider},
+        implementations::locations,
+        types::{
+            locations::{Location, LocationsQuery},
+            operatories::Operatory,
+            providers::Provider,
+        },
         NexApiClient,
     },
     commands::keys::get_api_key,
@@ -28,7 +33,8 @@ pub struct AppointmentSlotsProcessor {
 
 #[derive(Debug, Deserialize)]
 pub struct AppointmentSlotsProcessorData {
-    pub location_ids: Option<Vec<u32>>,
+    pub locations: Option<Vec<Location>>,
+    pub selected_location_ids: Option<Vec<u32>>,
     pub days: Option<u32>,
     pub appointment_type_id: Option<u32>,
     pub operatories: Option<Vec<Operatory>>,
@@ -41,7 +47,8 @@ impl AppointmentSlotsProcessor {
             app_state,
             current_step: ProcessStep::CheckApiKey,
             data: AppointmentSlotsProcessorData {
-                location_ids: None,
+                locations: None,
+                selected_location_ids: None,
                 days: None,
                 appointment_type_id: None,
                 operatories: None,
@@ -83,40 +90,40 @@ impl AppointmentSlotsProcessor {
                     .as_ref()
                     .ok_or(ProcessorError::MissingSubdomain)?;
 
-                self.current_step = ProcessStep::SelectLocations;
+                self.current_step = ProcessStep::FetchLocations;
+            }
+            ProcessStep::FetchLocations => {
+                let guard = self.app_state.data.lock().await;
+
+                let subdomain = guard
+                    .subdomain
+                    .as_ref()
+                    .ok_or(ProcessorError::MissingSubdomain)?;
+
+                let locations_response = client
+                    .get_locations(LocationsQuery {
+                        subdomain: subdomain.clone(),
+                        inactive: false,
+                    })
+                    .await
+                    .map_err(|e| {
+                        ProcessorError::InternalError(ErrorResolutionData::Message(e.to_string()))
+                    })?;
+
+                if let Some(institution_locations) = locations_response.data {
+                    self.data.locations = Some(institution_locations[0].locations.clone());
+                    self.current_step = ProcessStep::SelectLocations;
+                } else {
+                    return Err(ProcessorError::NoLocationsFound);
+                }
             }
             ProcessStep::SelectLocations => {
-                let Some(_) = self.data.location_ids.as_ref().filter(|l| !l.is_empty()) else {
-                    let guard = self.app_state.data.lock().await;
-
-                    let subdomain = guard
-                        .subdomain
-                        .as_ref()
-                        .ok_or(ProcessorError::MissingSubdomain)?;
-
-                    let locations_response = client
-                        .get_locations(LocationsQuery {
-                            subdomain: subdomain.clone(),
-                            inactive: false,
-                        })
-                        .await;
-
-                    return match locations_response {
-                        Ok(res) => {
-                            if let Some(loc_wrapper) = res.data {
-                                Err(ProcessorError::LocationRequired(
-                                    ErrorResolutionData::Locations(
-                                        loc_wrapper[0].locations.clone(),
-                                    ),
-                                ))
-                            } else {
-                                Err(ProcessorError::LocationRequired(ErrorResolutionData::None))
-                            }
-                        }
-                        Err(e) => Err(ProcessorError::InternalError(ErrorResolutionData::Message(
-                            e.to_string(),
-                        ))),
-                    };
+                let Some(_) = self.data.selected_location_ids else {
+                    return Err(ProcessorError::LocationRequired(
+                        ErrorResolutionData::Locations(
+                            self.data.locations.clone().unwrap_or_default(),
+                        ),
+                    ));
                 };
                 self.current_step = ProcessStep::EnterDays;
             }
@@ -124,7 +131,7 @@ impl AppointmentSlotsProcessor {
                 let Some(_) = self.data.days else {
                     return Err(ProcessorError::MissingDays);
                 };
-                self.current_step = ProcessStep::SelectLocations;
+                self.current_step = ProcessStep::SelectAppointmentType;
             }
             _ => return Ok(false),
         }
@@ -163,8 +170,11 @@ impl Processor for AppointmentSlotsProcessor {
         let input: AppointmentSlotsProcessorData = serde_json::from_value(data)
             .map_err(|e| format!("Invalid data for Appointment Slots Processor: {}", e))?;
 
-        if let Some(l) = input.location_ids {
-            self.data.location_ids = Some(l);
+        if let Some(l) = input.locations {
+            self.data.locations = Some(l);
+        }
+        if let Some(l) = input.selected_location_ids {
+            self.data.selected_location_ids = Some(l);
         }
         if let Some(d) = input.days {
             self.data.days = Some(d);

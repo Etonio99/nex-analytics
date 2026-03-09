@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import CheckApiKey from './processor-sub-pages/check-api-key';
 import LoadingIndicator from '../components/loading-indicator';
 import { ProcessorAdvanceResult } from '../types/processor-advance-result';
@@ -23,6 +23,8 @@ const Process = () => {
     ProcessorAdvanceResult | undefined
   >(undefined);
 
+  const startedProcess = useRef(false);
+
   const { advanceProcessor, updateProcessorData } = useProcessor();
   const { updateAppData } = useAppState();
 
@@ -40,7 +42,11 @@ const Process = () => {
   };
 
   useEffect(() => {
+    if (startedProcess.current) {
+      return;
+    }
     advance();
+    startedProcess.current = true;
   }, []);
 
   const appActions: AppActions = {

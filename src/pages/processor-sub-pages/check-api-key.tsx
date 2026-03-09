@@ -18,7 +18,7 @@ const CheckApiKey = (props: ProcessSubPageProps) => {
     }
 
     await setApiKey(apiKeyInput);
-    props.appActions.advanceProcessor();
+    await props.appActions.advanceProcessor();
   };
 
   return (
