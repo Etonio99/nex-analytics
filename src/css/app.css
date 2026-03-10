@@ -22,6 +22,10 @@ body {
   @apply bg-sandstone-50 accent-sandstone-700;
 }
 
+button {
+  cursor: pointer;
+}
+
 .pixelated {
   image-rendering: pixelated;
 }

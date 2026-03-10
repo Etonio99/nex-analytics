@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ProcessSubPageProps } from '../../types/process-sub-page-props';
 import ProcessorSubPage from './processor-sub-page';
 import Button from '../../components/button';
@@ -23,6 +23,14 @@ const SelectLocations = (props: ProcessSubPageProps) => {
       : [];
 
   const selectedCount = Object.values(locationSelection).filter(Boolean).length;
+
+  useEffect(() => {
+    const entries: Record<number, boolean> = {};
+    locations.forEach((location) => {
+      entries[location.id] = false;
+    });
+    setLocationSelection(entries);
+  }, []);
 
   return (
     <ProcessorSubPage title="Select Locations">

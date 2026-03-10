@@ -27,13 +27,25 @@ const MultiSelect = (props: MultiSelectProps) => {
     props.onChange(newState);
   };
 
+  const selectAll = () => {
+    const newState = Object.fromEntries(
+      Object.keys(props.value).map((k) => [k, true])
+    );
+    props.onChange(newState);
+  };
+
   return (
     <div>
       <div className="px-2 py-1 bg-sandstone-50">
         <p className="text-lg font-bold">{props.title}</p>
-        {props.description && (
-          <p className="text-sandstone-400 text-sm">{props.description}</p>
-        )}
+        <div className="flex justify-between text-sm">
+          {props.description && (
+            <p className="text-sandstone-400">{props.description}</p>
+          )}
+          <button className="text-teal-500 text-xs" onClick={selectAll}>
+            Select All
+          </button>
+        </div>
       </div>
       <div className="overflow-y-auto max-h-64 rounded-md overflow-hidden bg-sandstone-200">
         <ul className="p-2 space-y-2">
