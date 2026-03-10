@@ -58,12 +58,14 @@ const SelectLocations = (props: ProcessSubPageProps) => {
           } as MultiSelectItem;
         })}
       />
-      <Button
-        label="Save"
-        style="primary"
-        onClick={continueProcess}
-        disabled={selectedCount < 1}
-      />
+      <div className="flex justify-end mt-2">
+        <Button
+          label="Save"
+          style="primary"
+          onClick={continueProcess}
+          disabled={selectedCount < 1}
+        />
+      </div>
     </ProcessorSubPage>
   );
 };

@@ -3,6 +3,7 @@ import ProcessorSubPage from './processor-sub-page';
 import { ProcessSubPageProps } from '../../types/process-sub-page-props';
 import { errorMessages } from '../../types/processor-error';
 import { snakeCaseToTitleCase } from '../../utils/string-helper';
+import { BiEdit } from 'react-icons/bi';
 
 const Confirmation = (props: ProcessSubPageProps) => {
   const continueProcess = async () => {
@@ -15,28 +16,32 @@ const Confirmation = (props: ProcessSubPageProps) => {
       ? props.advanceResult.error.resolutionData.payload
       : null;
 
-  console.log(confirmationData);
-
   return (
     <ProcessorSubPage title="Confirmation">
       <p>
-        Please confirm that all of the entered information is correct before
+        Please confirm that all of the provided information is correct before
         proceeding.
       </p>
-      <div className="bg-sandstone-200 rounded-lg p-4">
+      <div className="border border-sandstone-300 rounded-lg overflow-hidden shadow shadow-sandstone-950/20 my-2">
         <ul>
+          <li className="grid grid-cols-[1fr_1fr_32px] px-4 py-2 font-bold text-sandstone-400">
+            <h2>Option</h2>
+            <h2>Value</h2>
+          </li>
+          <hr className="border-sandstone-200" />
           {confirmationData &&
             Object.entries(confirmationData).map(([key, value]) => (
-              <li className="flex justify-between">
-                <span className="text-sandstone-600">
-                  {snakeCaseToTitleCase(key)}:{' '}
-                </span>
-                {value}
+              <li className="grid grid-cols-[1fr_1fr_32px] px-4 py-2 even:bg-sandstone-100">
+                <p>{snakeCaseToTitleCase(key)}</p>
+                <p>{value}</p>
+                <button className="text-sandstone-400">
+                  <BiEdit />
+                </button>
               </li>
             ))}
         </ul>
       </div>
-      <div className="mt-2 flex justify-end items-center gap-2">
+      <div className="flex justify-end items-center gap-2">
         <Button label="Confirm" style="primary" onClick={continueProcess} />
         <Button label="Cancel" style="tertiary" />
       </div>

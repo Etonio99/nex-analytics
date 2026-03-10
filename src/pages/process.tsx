@@ -102,7 +102,11 @@ const Process = () => {
     }
   };
 
-  return getPage(advanceResult?.step);
+  return (
+    <div className="h-full max-w-2xl m-auto grid place-items-center">
+      {getPage(advanceResult?.step)}
+    </div>
+  );
 };
 
 export default Process;
