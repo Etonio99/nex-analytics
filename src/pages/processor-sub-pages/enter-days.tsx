@@ -16,9 +16,13 @@ const EnterDays = (props: ProcessSubPageProps) => {
 
     try {
       const parsedDays = parseInt(days);
+      if (Number.isNaN(parsedDays)) {
+        throw new Error('Days value is not a number');
+      }
       if (parsedDays > 60) {
         throw new Error('Days can not be longer than 60');
       }
+      console.log(`PARSED: ${parsedDays}`);
       await props.appActions.updateProcessorData({ days: parsedDays });
       await props.appActions.advanceProcessor();
     } catch (error) {
