@@ -20,7 +20,7 @@ pub enum ProcessorError {
 }
 
 #[derive(Debug, Clone, Serialize)]
-#[serde(tag = "type", content = "payload")]
+#[serde(tag = "type", content = "payload", rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum ErrorResolutionData {
     Message(String),
     Locations(Vec<Location>),

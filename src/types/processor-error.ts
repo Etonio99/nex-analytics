@@ -6,6 +6,9 @@ export interface ProcessorError {
     | 'INVALID_API_KEY'
     | 'MISSING_SUBDOMAIN'
     | 'LOCATION_REQUIRED'
+    | 'NO_LOCATIONS_FOUND'
+    | 'MISSING_DAYS'
+    | 'MISSING_APPOINTMENT_TYPE_NAME'
     | 'INTERNAL_ERROR';
   resolutionData?: ErrorResolutionData;
 }
@@ -16,8 +19,12 @@ export const errorMessages: Record<ProcessorError['type'], string> = {
   MISSING_SUBDOMAIN: 'Subdomain is required',
   LOCATION_REQUIRED: 'At least one location must be selected',
   INTERNAL_ERROR: 'An unexpected error occurred',
+  NO_LOCATIONS_FOUND: 'No locations found',
+  MISSING_DAYS: 'Days is required',
+  MISSING_APPOINTMENT_TYPE_NAME: 'Appointment type name is required',
 };
 
 type ErrorResolutionData =
-  | { type: 'Locations'; payload: NexLocation[] }
+  | { type: 'MESSAGE'; payload: string }
+  | { type: 'LOCATIONS'; payload: NexLocation[] }
   | { type: 'None'; payload: null };
