@@ -11,22 +11,23 @@ use crate::{
     content = "resolutionData",
     rename_all = "SCREAMING_SNAKE_CASE"
 )]
-pub enum ProcessorError {
+pub enum ProcessorInterrupt {
     MissingApiKey,
     InvalidApiKey,
-    MissingSubdomain,
-    LocationRequired(ErrorResolutionData),
+    MissingSubdomain(Option<InterruptResolutionData>),
+    LocationRequired(Option<InterruptResolutionData>),
     NoLocationsFound,
-    MissingDays,
-    MissingAppointmentTypeName,
-    NeedsConfirmation(ErrorResolutionData),
-    InternalError(ErrorResolutionData),
+    MissingDays(Option<InterruptResolutionData>),
+    MissingAppointmentTypeName(Option<InterruptResolutionData>),
+    NeedsConfirmation(InterruptResolutionData),
+    InternalError(InterruptResolutionData),
 }
 
 #[derive(Debug, Clone, Serialize)]
 #[serde(tag = "type", content = "payload", rename_all = "SCREAMING_SNAKE_CASE")]
-pub enum ErrorResolutionData {
-    Message(String),
+pub enum InterruptResolutionData {
+    String(String),
+    Number(u32),
     Locations(Vec<Location>),
     Confirmation(DataConfirmation),
     None,

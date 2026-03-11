@@ -1,11 +1,11 @@
 use serde::Serialize;
 
 use crate::services::processors::types::{
-    process_steps::ProcessStep, processor_error::ProcessorError,
+    process_steps::ProcessStep, processor_interrupt::ProcessorInterrupt,
 };
 
 #[derive(Serialize)]
 pub struct ProcessorAdvanceResult {
     pub step: ProcessStep,
-    pub error: Option<ProcessorError>,
+    pub error: Option<ProcessorInterrupt>,
 }
