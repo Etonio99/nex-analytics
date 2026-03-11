@@ -66,6 +66,11 @@ impl AppointmentSlotsProcessor {
         client: &NexApiClient,
         app: &tauri::AppHandle,
     ) -> Result<bool, ProcessorInterrupt> {
+        if Some(self.current_step.clone()) == self.target_step {
+            self.target_step = None;
+            return Err(self.get_interrupt_for_current_step());
+        }
+
         match self.current_step {
             ProcessStep::CheckApiKey => {
                 if get_api_key()
