@@ -7,5 +7,5 @@ use crate::services::processors::types::{
 #[derive(Serialize)]
 pub struct ProcessorAdvanceResult {
     pub step: ProcessStep,
-    pub error: Option<ProcessorInterrupt>,
+    pub interrupt: Option<ProcessorInterrupt>,
 }

@@ -8,9 +8,9 @@ import { interruptMessages } from '../../types/processor-interrupt';
 
 const EnterDays = (props: ProcessSubPageProps) => {
   const getInitialDays = (): string => {
-    if (props.advanceResult?.error?.type === 'MISSING_DAYS') {
-      if (props.advanceResult.error.resolutionData?.type === 'NUMBER') {
-        return props.advanceResult.error.resolutionData.payload.toString();
+    if (props.advanceResult?.interrupt?.type === 'MISSING_DAYS') {
+      if (props.advanceResult.interrupt.resolutionData?.type === 'NUMBER') {
+        return props.advanceResult.interrupt.resolutionData.payload.toString();
       }
     }
     return '';
@@ -59,7 +59,8 @@ const EnterDays = (props: ProcessSubPageProps) => {
         <p className="text-red-400 w-full text-center">
           {
             interruptMessages[
-              props.advanceResult.error?.type as keyof typeof interruptMessages
+              props.advanceResult.interrupt
+                ?.type as keyof typeof interruptMessages
             ]
           }
         </p>

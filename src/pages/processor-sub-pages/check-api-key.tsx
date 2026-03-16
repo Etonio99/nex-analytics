@@ -40,7 +40,8 @@ const CheckApiKey = (props: ProcessSubPageProps) => {
         <p className="text-red-400 w-full text-center">
           {
             interruptMessages[
-              props.advanceResult.error?.type as keyof typeof interruptMessages
+              props.advanceResult.interrupt
+                ?.type as keyof typeof interruptMessages
             ]
           }
         </p>

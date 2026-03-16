@@ -117,8 +117,8 @@ const Process = () => {
     }
   };
 
-  if (advanceResult?.error?.type == 'PERMISSION_DENIED') {
-    switch (advanceResult.error.resolutionData?.payload) {
+  if (advanceResult?.interrupt?.type == 'PERMISSION_DENIED') {
+    switch (advanceResult.interrupt.resolutionData?.payload) {
       case 'subdomain':
         jump('EnterSubdomain');
         break;

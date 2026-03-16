@@ -7,10 +7,10 @@ import { BiRightArrowAlt } from 'react-icons/bi';
 
 const SelectLocations = (props: ProcessSubPageProps) => {
   const getInitialSelectedLocations = (): number[] => {
-    if (props.advanceResult?.error?.type === 'LOCATION_REQUIRED') {
-      if (props.advanceResult.error.resolutionData?.type === 'LOCATIONS') {
+    if (props.advanceResult?.interrupt?.type === 'LOCATION_REQUIRED') {
+      if (props.advanceResult.interrupt.resolutionData?.type === 'LOCATIONS') {
         return (
-          props.advanceResult.error.resolutionData.payload
+          props.advanceResult.interrupt.resolutionData.payload
             .selected_location_ids ?? []
         );
       }
@@ -31,8 +31,8 @@ const SelectLocations = (props: ProcessSubPageProps) => {
   };
 
   const locations =
-    props.advanceResult?.error?.resolutionData?.type === 'LOCATIONS'
-      ? props.advanceResult.error.resolutionData.payload.locations
+    props.advanceResult?.interrupt?.resolutionData?.type === 'LOCATIONS'
+      ? props.advanceResult.interrupt.resolutionData.payload.locations
       : [];
 
   const selectedCount = Object.values(locationSelection).filter(Boolean).length;

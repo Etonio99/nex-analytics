@@ -8,9 +8,9 @@ import { interruptMessages } from '../../types/processor-interrupt';
 
 const EnterSubdomain = (props: ProcessSubPageProps) => {
   const getInitialSubdomain = (): string => {
-    if (props.advanceResult?.error?.type === 'MISSING_SUBDOMAIN') {
-      if (props.advanceResult.error.resolutionData?.type === 'STRING') {
-        return props.advanceResult.error.resolutionData.payload;
+    if (props.advanceResult?.interrupt?.type === 'MISSING_SUBDOMAIN') {
+      if (props.advanceResult.interrupt.resolutionData?.type === 'STRING') {
+        return props.advanceResult.interrupt.resolutionData.payload;
       }
     }
     return '';
@@ -45,7 +45,8 @@ const EnterSubdomain = (props: ProcessSubPageProps) => {
         <p className="text-red-400 w-full text-center">
           {
             interruptMessages[
-              props.advanceResult.error?.type as keyof typeof interruptMessages
+              props.advanceResult.interrupt
+                ?.type as keyof typeof interruptMessages
             ]
           }
         </p>

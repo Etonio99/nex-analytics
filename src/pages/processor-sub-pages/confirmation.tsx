@@ -13,8 +13,8 @@ const Confirmation = (props: ProcessSubPageProps) => {
   };
 
   const confirmationData =
-    props.advanceResult?.error?.resolutionData?.type === 'CONFIRMATION'
-      ? props.advanceResult.error.resolutionData.payload
+    props.advanceResult?.interrupt?.resolutionData?.type === 'CONFIRMATION'
+      ? props.advanceResult.interrupt.resolutionData.payload
       : null;
 
   const getStepFromConfirmationData = (
@@ -77,7 +77,8 @@ const Confirmation = (props: ProcessSubPageProps) => {
         <p className="text-red-400 w-full text-center">
           {
             interruptMessages[
-              props.advanceResult.error?.type as keyof typeof interruptMessages
+              props.advanceResult.interrupt
+                ?.type as keyof typeof interruptMessages
             ]
           }
         </p>

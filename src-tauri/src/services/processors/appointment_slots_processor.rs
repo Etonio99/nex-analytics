@@ -251,7 +251,7 @@ impl Processor for AppointmentSlotsProcessor {
         client: &NexApiClient,
         app: &tauri::AppHandle,
     ) -> Result<ProcessorAdvanceResult, String> {
-        let mut error = None;
+        let mut interrupt = None;
 
         loop {
             println!("Now advancing to {:?}", self.current_step);
@@ -259,7 +259,7 @@ impl Processor for AppointmentSlotsProcessor {
                 Ok(true) => continue,
                 Ok(false) => break,
                 Err(e) => {
-                    error = Some(e);
+                    interrupt = Some(e);
                     break;
                 }
             }
@@ -267,7 +267,7 @@ impl Processor for AppointmentSlotsProcessor {
 
         Ok(ProcessorAdvanceResult {
             step: self.current_step.clone(),
-            error,
+            interrupt,
         })
     }
 
