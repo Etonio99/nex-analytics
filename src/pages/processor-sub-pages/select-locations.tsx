@@ -5,6 +5,18 @@ import Button from '../../components/button';
 import MultiSelect, { MultiSelectItem } from '../../components/multi-select';
 
 const SelectLocations = (props: ProcessSubPageProps) => {
+  const getInitialSelectedLocations = (): number[] => {
+    if (props.advanceResult?.error?.type === 'LOCATION_REQUIRED') {
+      if (props.advanceResult.error.resolutionData?.type === 'LOCATIONS') {
+        return (
+          props.advanceResult.error.resolutionData.payload
+            .selected_location_ids ?? []
+        );
+      }
+    }
+    return [];
+  };
+
   const [locationSelection, setLocationSelection] = useState<
     Record<number, boolean>
   >({});
@@ -19,15 +31,16 @@ const SelectLocations = (props: ProcessSubPageProps) => {
 
   const locations =
     props.advanceResult?.error?.resolutionData?.type === 'LOCATIONS'
-      ? props.advanceResult.error.resolutionData.payload
+      ? props.advanceResult.error.resolutionData.payload.locations
       : [];
 
   const selectedCount = Object.values(locationSelection).filter(Boolean).length;
 
   useEffect(() => {
     const entries: Record<number, boolean> = {};
+    const initialSelectedLocations = getInitialSelectedLocations();
     locations.forEach((location) => {
-      entries[location.id] = false;
+      entries[location.id] = initialSelectedLocations.includes(location.id);
     });
     setLocationSelection(entries);
   }, []);
@@ -58,12 +71,14 @@ const SelectLocations = (props: ProcessSubPageProps) => {
           } as MultiSelectItem;
         })}
       />
-      <Button
-        label="Save"
-        style="primary"
-        onClick={continueProcess}
-        disabled={selectedCount < 1}
-      />
+      <div className="flex justify-end mt-2">
+        <Button
+          label="Save"
+          style="primary"
+          onClick={continueProcess}
+          disabled={selectedCount < 1}
+        />
+      </div>
     </ProcessorSubPage>
   );
 };

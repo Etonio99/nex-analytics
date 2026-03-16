@@ -1,15 +1,12 @@
-use std::sync::Arc;
-
 use crate::{
     api::NexApiClient,
     services::{
         controller::Controller,
         processors::{
             appointment_slots_processor::AppointmentSlotsProcessor,
-            types::processor_advance_result::ProcessorAdvanceResult,
+            types::{process_steps::ProcessStep, processor_advance_result::ProcessorAdvanceResult},
         },
     },
-    utils::app_state::AppState,
 };
 
 #[tauri::command]
@@ -49,10 +46,38 @@ pub async fn update_processor_data(
     data: serde_json::Value,
 ) -> Result<(), String> {
     let mut guard = controller.processor.lock().await;
+    let processor = guard.as_mut().ok_or("No processor selected")?;
+    processor.update_data(data)
+}
 
-    if let Some(ref mut processor) = *guard {
-        processor.update_data(data)
-    } else {
-        Err("No processor active".into())
-    }
+#[tauri::command]
+pub async fn update_app_data(
+    controller: tauri::State<'_, Controller>,
+    data: serde_json::Value,
+) -> Result<(), String> {
+    controller.update_app_data(data).await?;
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn make_stale(controller: tauri::State<'_, Controller>) -> Result<(), String> {
+    let mut guard = controller.processor.lock().await;
+    let processor = guard.as_mut().ok_or("No processor selected")?;
+    processor.make_stale();
+
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn jump_to_step(
+    app: tauri::AppHandle,
+    controller: tauri::State<'_, Controller>,
+    client: tauri::State<'_, NexApiClient>,
+    step: ProcessStep,
+) -> Result<ProcessorAdvanceResult, String> {
+    println!("Received {:?}", step);
+    let mut guard = controller.processor.lock().await;
+    let processor = guard.as_mut().ok_or("No processor selected")?;
+    processor.jump_to_step(step);
+    processor.advance(&client, &app).await
 }

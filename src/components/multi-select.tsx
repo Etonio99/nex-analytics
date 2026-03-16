@@ -27,12 +27,18 @@ const MultiSelect = (props: MultiSelectProps) => {
     props.onChange(newState);
   };
 
-  const selectAll = () => {
+  const setAll = (setting: boolean) => {
     const newState = Object.fromEntries(
-      Object.keys(props.value).map((k) => [k, true])
+      Object.keys(props.value).map((k) => [k, setting])
     );
     props.onChange(newState);
   };
+
+  const areAllSelected = (): boolean =>
+    Object.values(props.value).every((v) => v === true);
+
+  const selectedCount = (): number =>
+    Object.values(props.value).filter(Boolean).length;
 
   return (
     <div>
@@ -42,9 +48,22 @@ const MultiSelect = (props: MultiSelectProps) => {
           {props.description && (
             <p className="text-sandstone-400">{props.description}</p>
           )}
-          <button className="text-teal-500 text-xs" onClick={selectAll}>
-            Select All
-          </button>
+          {areAllSelected() && (
+            <button
+              className="text-teal-500 text-xs"
+              onClick={() => setAll(false)}
+            >
+              Deselect All
+            </button>
+          )}
+          {!areAllSelected() && (
+            <button
+              className="text-teal-500 text-xs"
+              onClick={() => setAll(true)}
+            >
+              Select All
+            </button>
+          )}
         </div>
       </div>
       <div className="overflow-y-auto max-h-64 rounded-md overflow-hidden bg-sandstone-200">
@@ -60,6 +79,9 @@ const MultiSelect = (props: MultiSelectProps) => {
             />
           ))}
         </ul>
+      </div>
+      <div className="flex justify-end mt-2">
+        <p className="text-xs text-sandstone-300">{`${selectedCount()} of ${Object.keys(props.value).length} selected`}</p>
       </div>
     </div>
   );

@@ -26,6 +26,10 @@ button {
   cursor: pointer;
 }
 
+button:disabled {
+  cursor: not-allowed;
+}
+
 .pixelated {
   image-rendering: pixelated;
 }

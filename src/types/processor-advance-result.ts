@@ -1,7 +1,7 @@
-import { ProcessorError } from './processor-error';
+import { ProcessorInterrupt } from './processor-interrupt';
 import { ProcessStep } from './processor-steps';
 
 export type ProcessorAdvanceResult = {
   step: ProcessStep;
-  error: ProcessorError | null;
+  error: ProcessorInterrupt | null;
 };

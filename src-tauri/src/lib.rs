@@ -16,8 +16,10 @@ use crate::{
     },
     commands::{
         api_calls::get_locations,
-        app_state::update_app_data,
-        controller::{advance_processor, set_processor, update_processor_data},
+        controller::{
+            advance_processor, jump_to_step, make_stale, set_processor, update_app_data,
+            update_processor_data,
+        },
         keys::{get_api_key, save_api_key},
     },
     services::controller::Controller,
@@ -48,6 +50,8 @@ pub fn run() {
             advance_processor,
             update_processor_data,
             update_app_data,
+            make_stale,
+            jump_to_step,
             get_locations,
         ])
         .run(tauri::generate_context!())

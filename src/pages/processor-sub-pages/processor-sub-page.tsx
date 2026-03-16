@@ -5,7 +5,7 @@ interface ProcessorSubPageProps {
 
 const ProcessorSubPage = (props: ProcessorSubPageProps) => {
   return (
-    <div className="max-w-xl m-auto">
+    <div className="w-full">
       <h1 className="text-4xl font-bold mb-4 text-sandstone-300">
         {props.title}
       </h1>

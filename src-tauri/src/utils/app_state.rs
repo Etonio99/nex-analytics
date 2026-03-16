@@ -28,7 +28,12 @@ impl AppState {
         }
     }
 
-    pub async fn update(&self, data: serde_json::Value) -> Result<(), String> {
+    pub async fn update(
+        &self,
+        data: serde_json::Value,
+    ) -> Result<Vec<AppDataUpdateResponse>, String> {
+        let mut responses: Vec<AppDataUpdateResponse> = Vec::new();
+
         let mut guard = self.data.lock().await;
 
         let mut current_value = serde_json::to_value(&*guard).map_err(|e| e.to_string())?;
@@ -37,6 +42,14 @@ impl AppState {
             if let Some(update_data) = data.as_object() {
                 for (key, value) in update_data {
                     if !value.is_null() {
+                        if key == "subdomain" {
+                            let new_subdomain = value.as_str().map(|s| s.to_string());
+
+                            if new_subdomain != guard.subdomain {
+                                responses.push(AppDataUpdateResponse::MakeProcessorStale);
+                            }
+                        }
+
                         current_data.insert(key.clone(), value.clone());
                     }
                 }
@@ -50,6 +63,10 @@ impl AppState {
         let json_string = serde_json::to_string_pretty(&*guard).map_err(|e| e.to_string())?;
         fs::write(&self.path, json_string).map_err(|e| e.to_string())?;
 
-        Ok(())
+        Ok(responses)
     }
+}
+
+pub enum AppDataUpdateResponse {
+    MakeProcessorStale,
 }

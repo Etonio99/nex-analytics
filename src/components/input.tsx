@@ -17,6 +17,7 @@ const Input = (props: InputProps) => {
         <input
           type="text"
           placeholder={props.placeholder}
+          autoComplete="off"
           className="w-full outline-none"
           value={props.value ?? ''}
           onChange={props.onChange}

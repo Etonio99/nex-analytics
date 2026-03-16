@@ -4,10 +4,21 @@ import ProcessorSubPage from './processor-sub-page';
 import Input from '../../components/input';
 import { BiBuildings } from 'react-icons/bi';
 import { ProcessSubPageProps } from '../../types/process-sub-page-props';
-import { errorMessages } from '../../types/processor-error';
+import { interruptMessages } from '../../types/processor-interrupt';
 
 const EnterSubdomain = (props: ProcessSubPageProps) => {
-  const [subdomainInput, setSubdomainInput] = useState<string>('');
+  const getInitialSubdomain = (): string => {
+    if (props.advanceResult?.error?.type === 'MISSING_SUBDOMAIN') {
+      if (props.advanceResult.error.resolutionData?.type === 'STRING') {
+        return props.advanceResult.error.resolutionData.payload;
+      }
+    }
+    return '';
+  };
+
+  const [subdomainInput, setSubdomainInput] = useState<string>(
+    getInitialSubdomain()
+  );
 
   const continueProcess = async () => {
     if (!subdomainInput) {
@@ -33,8 +44,8 @@ const EnterSubdomain = (props: ProcessSubPageProps) => {
       {props.advanceResult && (
         <p className="text-red-400 w-full text-center">
           {
-            errorMessages[
-              props.advanceResult.error?.type as keyof typeof errorMessages
+            interruptMessages[
+              props.advanceResult.error?.type as keyof typeof interruptMessages
             ]
           }
         </p>

@@ -1,6 +1,7 @@
 import { invoke } from '@tauri-apps/api/core';
 import { ProcessorAdvanceResult } from '../types/processor-advance-result';
 import { ProcessorDataUpdate } from '../types/processor-data-update';
+import { ProcessStep } from '../types/processor-steps';
 
 export const useProcessor = () => {
   const setProcessor = async (processorName: string): Promise<boolean> =>
@@ -24,9 +25,19 @@ export const useProcessor = () => {
       .then(() => true)
       .catch(() => false);
 
+  const jumpToStep = async (
+    step: ProcessStep
+  ): Promise<ProcessorAdvanceResult | undefined> =>
+    invoke<ProcessorAdvanceResult>('jump_to_step', {
+      step,
+    })
+      .then((response) => response)
+      .catch(() => undefined);
+
   return {
     setProcessor,
     advanceProcessor,
     updateProcessorData,
+    jumpToStep,
   };
 };

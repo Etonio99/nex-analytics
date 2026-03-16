@@ -5,7 +5,7 @@ import ProcessorSubPage from './processor-sub-page';
 import Input from '../../components/input';
 import { BiSolidKey } from 'react-icons/bi';
 import { ProcessSubPageProps } from '../../types/process-sub-page-props';
-import { errorMessages } from '../../types/processor-error';
+import { interruptMessages } from '../../types/processor-interrupt';
 
 const CheckApiKey = (props: ProcessSubPageProps) => {
   const [apiKeyInput, setApiKeyInput] = useState<string>('');
@@ -39,8 +39,8 @@ const CheckApiKey = (props: ProcessSubPageProps) => {
       {props.advanceResult && (
         <p className="text-red-400 w-full text-center">
           {
-            errorMessages[
-              props.advanceResult.error?.type as keyof typeof errorMessages
+            interruptMessages[
+              props.advanceResult.error?.type as keyof typeof interruptMessages
             ]
           }
         </p>

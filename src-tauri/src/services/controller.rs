@@ -11,7 +11,7 @@ use crate::{
         NexApiClient,
     },
     services::processors::traits::Processor,
-    utils::app_state::AppState,
+    utils::app_state::{AppDataUpdateResponse, AppState},
 };
 
 pub struct Controller {
@@ -48,5 +48,23 @@ impl Controller {
             .map_err(|e| e.to_string())?;
 
         Ok(response)
+    }
+
+    pub async fn update_app_data(&self, data: serde_json::Value) -> Result<(), String> {
+        let responses = self.app_state.update(data).await?;
+
+        for response in responses {
+            match response {
+                AppDataUpdateResponse::MakeProcessorStale => {
+                    let mut guard = self.processor.lock().await;
+
+                    if let Some(processor) = guard.as_mut() {
+                        processor.make_stale();
+                    }
+                }
+            }
+        }
+
+        Ok(())
     }
 }

@@ -19,6 +19,7 @@ export type AppActions = {
   advanceProcessor: () => Promise<boolean>;
   updateProcessorData: (data: ProcessorDataUpdate) => Promise<boolean>;
   updateAppData: (data: AppData) => Promise<boolean>;
+  jumpToStep: (step: ProcessStep) => Promise<boolean>;
 };
 
 const Process = () => {
@@ -28,13 +29,26 @@ const Process = () => {
 
   const startedProcess = useRef(false);
 
-  const { advanceProcessor, updateProcessorData } = useProcessor();
+  const { advanceProcessor, updateProcessorData, jumpToStep } = useProcessor();
   const { updateAppData } = useAppState();
 
   const advance = async (): Promise<boolean> => {
     try {
       setAdvanceResult(undefined);
       const response = await advanceProcessor();
+      console.log(response);
+      setAdvanceResult(response);
+      return true;
+    } catch (error) {
+      console.error(error);
+      return false;
+    }
+  };
+
+  const jump = async (step: ProcessStep): Promise<boolean> => {
+    try {
+      setAdvanceResult(undefined);
+      const response = await jumpToStep(step);
       console.log(response);
       setAdvanceResult(response);
       return true;
@@ -56,6 +70,7 @@ const Process = () => {
     advanceProcessor: advance,
     updateProcessorData,
     updateAppData,
+    jumpToStep: jump,
   };
 
   const getPage = (stepName: ProcessStep | undefined) => {
@@ -102,7 +117,19 @@ const Process = () => {
     }
   };
 
-  return getPage(advanceResult?.step);
+  if (advanceResult?.error?.type == 'PERMISSION_DENIED') {
+    switch (advanceResult.error.resolutionData?.payload) {
+      case 'subdomain':
+        jump('EnterSubdomain');
+        break;
+    }
+  }
+
+  return (
+    <div className="h-full max-w-2xl m-auto grid place-items-center">
+      {getPage(advanceResult?.step)}
+    </div>
+  );
 };
 
 export default Process;
