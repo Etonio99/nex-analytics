@@ -1,9 +1,10 @@
-use std::{collections::HashMap, os::unix::process, sync::Arc};
+use std::{collections::HashMap, fs, path::PathBuf, sync::Arc};
 
 use async_trait::async_trait;
 use chrono::{Duration, Local};
-use rust_xlsxwriter::{workbook::Workbook, Format, FormatAlign, FormatBorder};
+use rust_xlsxwriter::{workbook::Workbook, Format, FormatAlign, FormatBorder, XlsxError};
 use serde::Deserialize;
+use tauri::Manager;
 
 use crate::{
     api::{
@@ -203,7 +204,7 @@ impl AppointmentSlotsProcessor {
                 self.current_step = ProcessStep::Processing;
             }
             ProcessStep::Processing => {
-                self.process(client).await?;
+                self.process(client, app).await?;
                 self.current_step = ProcessStep::Complete;
             }
             _ => return Ok(false),
@@ -254,7 +255,11 @@ impl AppointmentSlotsProcessor {
         value.map(InterruptResolutionData::Number)
     }
 
-    async fn process(&self, client: &NexApiClient) -> Result<(), ProcessorInterrupt> {
+    async fn process(
+        &self,
+        client: &NexApiClient,
+        app: &tauri::AppHandle,
+    ) -> Result<(), ProcessorInterrupt> {
         let mut available_slot_data: Vec<LocationAvailableSlots> = vec![];
 
         let guard = self.app_state.data.lock().await;
@@ -274,6 +279,8 @@ impl AppointmentSlotsProcessor {
                 InterruptResolutionData::String("Days is missing".into()),
             ));
         };
+
+        let start_date = Local::now().date_naive();
 
         if let Some(location_ids) = self.data.selected_location_ids.clone() {
             for location_id in location_ids {
@@ -349,8 +356,6 @@ impl AppointmentSlotsProcessor {
 
                 let provider_ids = providers_list.iter().map(|p| p.id).collect();
 
-                let start_date = Local::now().date_naive();
-
                 let appointment_slots_response = client
                     .get_appointment_slots(AppointmentSlotsQuery {
                         subdomain: subdomain.clone(),
@@ -418,16 +423,55 @@ impl AppointmentSlotsProcessor {
             println!("Success! {:#?}", available_slot_data);
         }
 
-        // let mut workbook = Workbook::new();
+        let save_path = app
+            .path()
+            .document_dir()
+            .map_err(|e| {
+                ProcessorInterrupt::InternalError(InterruptResolutionData::String(e.to_string()))
+            })?
+            .join("Nex Analytics")
+            .join("Available Slots");
 
-        // let bold_format = Format::new().set_bold();
-        // let decimal_format = Format::new().set_num_format("0.000");
-        // let date_format = Format::new().set_num_format("yyyy-mm-dd");
-        // let merge_format = Format::new()
-        //     .set_border(FormatBorder::Thin)
-        //     .set_align(FormatAlign::Center);
+        self.write_workbook(save_path, start_date, *days, &available_slot_data)
+            .map_err(|e| {
+                ProcessorInterrupt::InternalError(InterruptResolutionData::String(e.to_string()))
+            })?;
 
-        // let worksheet = workbook.add_worksheet();
+        Ok(())
+    }
+
+    fn write_workbook(
+        &self,
+        dir: PathBuf,
+        start_date: chrono::NaiveDate,
+        days: u32,
+        data: &[LocationAvailableSlots],
+    ) -> Result<(), XlsxError> {
+        fs::create_dir_all(&dir)?;
+
+        let file_name = format!("available_slots_{}_{}_days.xlsx", start_date, days);
+        let file_path = dir.join(file_name);
+
+        let mut workbook = Workbook::new();
+
+        for location in data {
+            let worksheet = workbook.add_worksheet();
+            worksheet.set_name(format!("Location {}", location.location_id))?;
+            worksheet.set_freeze_panes(1, 1)?;
+
+            worksheet.write(0, 0, "Date")?;
+            worksheet.write(0, 1, "Available Slots")?;
+
+            if let Some(slots) = &location.available_slots {
+                for (i, entry) in slots.iter().enumerate() {
+                    let row = (i + 1) as u32;
+                    worksheet.write(row, 0, &entry.day)?;
+                    worksheet.write(row, 1, entry.available_slots_count)?;
+                }
+            }
+        }
+
+        workbook.save(file_path)?;
 
         Ok(())
     }
