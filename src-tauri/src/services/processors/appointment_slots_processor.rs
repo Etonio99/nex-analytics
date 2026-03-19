@@ -479,7 +479,7 @@ impl AppointmentSlotsProcessor {
                 .map(|l| l.name.as_str())
                 .unwrap_or("Unnamed Location");
             let full_name = format!("{} - {}", location_slot_data.location_id, location_name);
-            let worksheet_name: String = full_name.chars().take(31).collect();
+            let worksheet_name: String = full_name.chars().take(31).collect(); // Excel worksheet names are limited to 31 characters
             worksheet.set_name(worksheet_name)?;
             worksheet.set_freeze_panes(1, 1)?;
 
