@@ -7,7 +7,7 @@ use rust_xlsxwriter::{
     TableFunction, XlsxError,
 };
 use serde::Deserialize;
-use tauri::Manager;
+use tauri::{Emitter, Manager};
 
 use crate::{
     api::{
@@ -285,12 +285,29 @@ impl AppointmentSlotsProcessor {
 
         let start_date = Local::now().date_naive();
 
+        let mut counter = 0;
         if let Some(location_ids) = self.data.selected_location_ids.clone() {
-            for location_id in location_ids {
+            for location_id in &location_ids {
+                counter += 1;
+                let _ = app
+                    .emit(
+                        "progress",
+                        format!(
+                            "Processing location {} of {}...",
+                            counter,
+                            location_ids.len()
+                        ),
+                    )
+                    .map_err(|e| {
+                        ProcessorInterrupt::InternalError(InterruptResolutionData::String(
+                            e.to_string(),
+                        ))
+                    });
+
                 let appointment_types_response = client
                     .get_appointment_types(AppointmentTypesQuery {
                         subdomain: subdomain.clone(),
-                        location_id,
+                        location_id: *location_id,
                     })
                     .await
                     .map_err(|e| {
@@ -322,7 +339,7 @@ impl AppointmentSlotsProcessor {
                         location_id
                     );
                     available_slot_data.push(LocationAvailableSlots {
-                        location_id,
+                        location_id: *location_id,
                         error: Some(LocationAvailableSlotsError::AppointmentTypeNotFound),
                         available_slots: None,
                     });
@@ -332,7 +349,7 @@ impl AppointmentSlotsProcessor {
                 let providers_response = client
                     .get_providers(ProvidersQuery {
                         subdomain: subdomain.clone(),
-                        location_id,
+                        location_id: *location_id,
                         inactive: false,
                         requestable: true,
                         per_page: 300,
@@ -365,7 +382,7 @@ impl AppointmentSlotsProcessor {
                         start_date,
                         days: *days,
                         appointment_type_id: appointment_type.id,
-                        location_id,
+                        location_id: *location_id,
                         provider_ids,
                     })
                     .await
@@ -383,7 +400,7 @@ impl AppointmentSlotsProcessor {
                         .and_then(|e| Some(e.join(", ")))
                         .unwrap_or("Unknown Error".to_string());
                     available_slot_data.push(LocationAvailableSlots {
-                        location_id,
+                        location_id: *location_id,
                         error: Some(LocationAvailableSlotsError::CallFailure { error_message }),
                         available_slots: None,
                     });
@@ -393,7 +410,7 @@ impl AppointmentSlotsProcessor {
                 let Some(slot_data) = appointment_slots_response.data else {
                     println!("Slot data is None");
                     available_slot_data.push(LocationAvailableSlots {
-                        location_id,
+                        location_id: *location_id,
                         error: Some(LocationAvailableSlotsError::NoSlotData),
                         available_slots: None,
                     });
@@ -424,7 +441,7 @@ impl AppointmentSlotsProcessor {
                 available_slots.sort_by(|a, b| a.day.cmp(&b.day));
 
                 available_slot_data.push(LocationAvailableSlots {
-                    location_id,
+                    location_id: *location_id,
                     error: None,
                     available_slots: Some(available_slots),
                 });

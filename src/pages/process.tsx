@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { listen } from '@tauri-apps/api/event';
 import CheckApiKey from './processor-sub-pages/check-api-key';
-import LoadingIndicator from '../components/loading-indicator';
 import { ProcessorAdvanceResult } from '../types/processor-advance-result';
 import { useProcessor } from '../hooks/useProcessor';
 import { ProcessStep } from '../types/processor-steps';
@@ -14,6 +14,7 @@ import SelectLocations from './processor-sub-pages/select-locations';
 import EnterDays from './processor-sub-pages/enter-days';
 import EnterAppointmentTypeName from './processor-sub-pages/enter-appointment-type-name';
 import Confirmation from './processor-sub-pages/confirmation';
+import Loading from './processor-sub-pages/loading';
 
 export type AppActions = {
   advanceProcessor: () => Promise<boolean>;
@@ -26,6 +27,7 @@ const Process = () => {
   const [advanceResult, setAdvanceResult] = useState<
     ProcessorAdvanceResult | undefined
   >(undefined);
+  const [progressMessage, setProgressMessage] = useState('');
 
   const startedProcess = useRef(false);
 
@@ -59,6 +61,20 @@ const Process = () => {
   };
 
   useEffect(() => {
+    let unlisten: (() => void) | undefined;
+
+    listen<string>('progress', (event) => {
+      setProgressMessage(event.payload);
+    }).then((fn) => {
+      unlisten = fn;
+    });
+
+    return () => {
+      unlisten?.();
+    };
+  }, []);
+
+  useEffect(() => {
     if (startedProcess.current) {
       return;
     }
@@ -75,7 +91,7 @@ const Process = () => {
 
   const getPage = (stepName: ProcessStep | undefined) => {
     if (!stepName) {
-      return <LoadingIndicator />;
+      return <Loading message={progressMessage} />;
     }
 
     console.log(stepName);

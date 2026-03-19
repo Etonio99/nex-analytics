@@ -1,6 +1,6 @@
 import '../css/animations.css';
 
-export const LoadingIndicator = () => {
+const LoadingIndicator = () => {
   return (
     <div className="absolute inset-0 grid place-items-center">
       <img
