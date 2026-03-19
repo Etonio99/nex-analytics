@@ -9,6 +9,7 @@ pub struct LocationAvailableSlots {
 pub enum LocationAvailableSlotsError {
     AppointmentTypeNotFound,
     NoSlotData,
+    CallFailure { error_message: String },
 }
 
 #[derive(Debug)]

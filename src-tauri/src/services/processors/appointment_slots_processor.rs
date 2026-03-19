@@ -1,4 +1,4 @@
-use std::{collections::HashMap, fs, path::PathBuf, sync::Arc};
+use std::{collections::HashMap, fmt::format, fs, path::PathBuf, sync::Arc};
 
 use async_trait::async_trait;
 use chrono::{Duration, Local};
@@ -374,9 +374,17 @@ impl AppointmentSlotsProcessor {
 
                 if !appointment_slots_response.code {
                     println!("API call failed: {:#?}", appointment_slots_response);
-                    return Err(ProcessorInterrupt::InternalError(
-                        InterruptResolutionData::None,
-                    ));
+                    let error_message = appointment_slots_response
+                        .error
+                        .as_ref()
+                        .and_then(|e| Some(e.join(", ")))
+                        .unwrap_or("Unknown Error".to_string());
+                    available_slot_data.push(LocationAvailableSlots {
+                        location_id,
+                        error: Some(LocationAvailableSlotsError::CallFailure { error_message }),
+                        available_slots: None,
+                    });
+                    continue;
                 }
 
                 let Some(slot_data) = appointment_slots_response.data else {
@@ -449,20 +457,52 @@ impl AppointmentSlotsProcessor {
     ) -> Result<(), XlsxError> {
         fs::create_dir_all(&dir)?;
 
-        let file_name = format!("available_slots_{}_{}_days.xlsx", start_date, days);
+        let now = Local::now();
+
+        let file_name = format!(
+            "available_slots_{}_{}d_{}.xlsx",
+            start_date,
+            days,
+            now.format("%Y-%m-%dT%H-%M-%S%z")
+        );
         let file_path = dir.join(file_name);
 
         let mut workbook = Workbook::new();
 
-        for location in data {
+        for location_slot_data in data {
             let worksheet = workbook.add_worksheet();
-            worksheet.set_name(format!("Location {}", location.location_id))?;
+            let location_name = self
+                .data
+                .locations
+                .as_ref()
+                .and_then(|locs| locs.iter().find(|l| l.id == location_slot_data.location_id))
+                .map(|l| l.name.as_str())
+                .unwrap_or("Unnamed Location");
+            let full_name = format!("{} - {}", location_slot_data.location_id, location_name);
+            let worksheet_name: String = full_name.chars().take(31).collect();
+            worksheet.set_name(worksheet_name)?;
             worksheet.set_freeze_panes(1, 1)?;
+
+            if let Some(error) = &location_slot_data.error {
+                let error_msg = match error {
+                    LocationAvailableSlotsError::AppointmentTypeNotFound => {
+                        "Failed to find appointment type with the provided name".to_string()
+                    }
+                    LocationAvailableSlotsError::NoSlotData => {
+                        "Appointment slots data was empty".to_string()
+                    }
+                    LocationAvailableSlotsError::CallFailure { error_message } => {
+                        format!("Api call failed: {}", error_message)
+                    }
+                };
+                worksheet.write(0, 0, error_msg.as_str())?;
+                continue;
+            }
 
             worksheet.write(0, 0, "Date")?;
             worksheet.write(0, 1, "Available Slots")?;
 
-            if let Some(slots) = &location.available_slots {
+            if let Some(slots) = &location_slot_data.available_slots {
                 for (i, entry) in slots.iter().enumerate() {
                     let row = (i + 1) as u32;
                     worksheet.write(row, 0, &entry.day)?;
@@ -471,6 +511,7 @@ impl AppointmentSlotsProcessor {
             }
         }
 
+        println!("Saving file to {:?}", file_path.to_str());
         workbook.save(file_path)?;
 
         Ok(())
