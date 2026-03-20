@@ -17,8 +17,8 @@ use crate::{
     commands::{
         api_calls::get_locations,
         controller::{
-            advance_processor, jump_to_step, make_stale, set_processor, update_app_data,
-            update_processor_data,
+            advance_processor, clear_processor, jump_to_step, make_stale, set_processor,
+            update_app_data, update_processor_data,
         },
         file_system::reveal_file_or_directory,
         keys::{get_api_key, save_api_key},
@@ -48,6 +48,7 @@ pub fn run() {
             save_api_key,
             get_api_key,
             set_processor,
+            clear_processor,
             advance_processor,
             update_processor_data,
             update_app_data,

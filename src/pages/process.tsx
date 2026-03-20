@@ -17,14 +17,19 @@ import Confirmation from './processor-sub-pages/confirmation';
 import Loading from './processor-sub-pages/loading';
 import Complete from './processor-sub-pages/complete';
 
+interface ProcessProps {
+  navigate: (page: string) => void;
+}
+
 export type AppActions = {
   advanceProcessor: () => Promise<boolean>;
   updateProcessorData: (data: ProcessorDataUpdate) => Promise<boolean>;
   updateAppData: (data: AppData) => Promise<boolean>;
   jumpToStep: (step: ProcessStep) => Promise<boolean>;
+  finish: () => Promise<void>;
 };
 
-const Process = () => {
+const Process = (props: ProcessProps) => {
   const [advanceResult, setAdvanceResult] = useState<
     ProcessorAdvanceResult | undefined
   >(undefined);
@@ -32,7 +37,7 @@ const Process = () => {
 
   const startedProcess = useRef(false);
 
-  const { advanceProcessor, updateProcessorData, jumpToStep } = useProcessor();
+  const { advanceProcessor, clearProcessor, updateProcessorData, jumpToStep } = useProcessor();
   const { updateAppData } = useAppState();
 
   const advance = async (): Promise<boolean> => {
@@ -83,11 +88,17 @@ const Process = () => {
     startedProcess.current = true;
   }, []);
 
+  const finish = async (): Promise<void> => {
+    await clearProcessor();
+    props.navigate('home');
+  };
+
   const appActions: AppActions = {
     advanceProcessor: advance,
     updateProcessorData,
     updateAppData,
     jumpToStep: jump,
+    finish,
   };
 
   const getPage = (stepName: ProcessStep | undefined) => {

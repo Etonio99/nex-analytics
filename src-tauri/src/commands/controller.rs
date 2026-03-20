@@ -60,6 +60,13 @@ pub async fn update_app_data(
 }
 
 #[tauri::command]
+pub async fn clear_processor(controller: tauri::State<'_, Controller>) -> Result<(), String> {
+    let mut guard = controller.processor.lock().await;
+    *guard = None;
+    Ok(())
+}
+
+#[tauri::command]
 pub async fn make_stale(controller: tauri::State<'_, Controller>) -> Result<(), String> {
     let mut guard = controller.processor.lock().await;
     let processor = guard.as_mut().ok_or("No processor selected")?;

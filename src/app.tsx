@@ -16,7 +16,7 @@ const App = () => {
       case 'faq':
         return <FAQ />;
       case 'process':
-        return <Process />;
+        return <Process navigate={setPage} />;
     }
     return null;
   };

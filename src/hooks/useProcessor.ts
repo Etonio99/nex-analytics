@@ -34,8 +34,14 @@ export const useProcessor = () => {
       .then((response) => response)
       .catch(() => undefined);
 
+  const clearProcessor = async (): Promise<boolean> =>
+    invoke('clear_processor')
+      .then(() => true)
+      .catch(() => false);
+
   return {
     setProcessor,
+    clearProcessor,
     advanceProcessor,
     updateProcessorData,
     jumpToStep,

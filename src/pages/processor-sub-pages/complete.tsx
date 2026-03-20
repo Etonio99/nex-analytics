@@ -7,9 +7,7 @@ const Complete = (props: ProcessSubPageProps) => {
   const { revealFileOrDirectory } = useFileSystem();
 
   const finish = async () => {
-    await props.appActions.updateProcessorData({
-      completion_acknowledged: true,
-    });
+    await props.appActions.finish();
   };
 
   const path =
