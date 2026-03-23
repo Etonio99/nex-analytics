@@ -38,7 +38,7 @@ const Confirmation = (props: ProcessSubPageProps) => {
   const cancel = async () => {
     const confirmed = await confirm({
       title: 'Do you really want to cancel?',
-      description: 'Some data may be need to be re-entered if you cancel.',
+      description: 'Some data may be lost.',
       confirmLabel: 'Cancel',
       cancelLabel: 'Nevermind',
     });
@@ -88,8 +88,8 @@ const Confirmation = (props: ProcessSubPageProps) => {
         </ul>
       </div>
       <div className="flex justify-end items-center gap-2">
-        <Button label="Confirm" style="primary" onClick={continueProcess} />
         <Button label="Cancel" style="tertiary" onClick={cancel} />
+        <Button label="Confirm" style="primary" onClick={continueProcess} />
       </div>
       {props.advanceResult && (
         <p className="text-red-400 w-full text-center">
