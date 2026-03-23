@@ -21,6 +21,7 @@ export default function NotificationContextProvider(
   props: NotificationContextProviderProps
 ) {
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
+  const [dismissingIds, setDismissingIds] = useState<Set<string>>(new Set());
 
   function notify(title: string, message: string) {
     const id = crypto.randomUUID();
@@ -33,7 +34,15 @@ export default function NotificationContextProvider(
   }
 
   function dismiss(id: string) {
-    setNotifications((n) => n.filter((n) => n.id !== id));
+    setDismissingIds((prev) => new Set(prev).add(id));
+    setTimeout(() => {
+      setNotifications((n) => n.filter((n) => n.id !== id));
+      setDismissingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(id);
+        return next;
+      });
+    }, 200);
   }
 
   return (
@@ -43,7 +52,11 @@ export default function NotificationContextProvider(
         dismiss,
       }}
     >
-      <NotificationList notifications={notifications} dismiss={dismiss} />
+      <NotificationList
+        notifications={notifications}
+        dismissingIds={dismissingIds}
+        dismiss={dismiss}
+      />
       {props.children}
     </NotificationContext.Provider>
   );

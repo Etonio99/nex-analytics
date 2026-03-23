@@ -39,3 +39,18 @@
 .slide-in-animation {
   animation: slide-in 0.2s ease-out;
 }
+
+@keyframes slide-out {
+  0% {
+    transform: translateY(0);
+    opacity: 100%;
+  }
+  100% {
+    transform: translateX(20px);
+    opacity: 0%;
+  }
+}
+
+.slide-out-animation {
+  animation: slide-out 0.2s ease-out;
+}
