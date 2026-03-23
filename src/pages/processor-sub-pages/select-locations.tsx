@@ -47,10 +47,13 @@ const SelectLocations = (props: ProcessSubPageProps) => {
   }, []);
 
   return (
-    <ProcessorSubPage title="Select Locations">
+    <ProcessorSubPage
+      title="Select Locations"
+      description="Select the locations you want to collect analytics from. Note that additional API calls will be made for each selected location."
+    >
       <MultiSelect
-        title="Select locations"
-        description="Choose which locations you want to collect data from"
+        // title="Select locations"
+        description="Select any number of locations below"
         value={locationSelection}
         onChange={setLocationSelection}
         items={locations.map((location) => {

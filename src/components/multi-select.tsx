@@ -8,7 +8,7 @@ export type MultiSelectItem = {
 };
 
 interface MultiSelectProps {
-  title: string;
+  title?: string;
   description?: string;
   items: MultiSelectItem[];
   value: Record<number, boolean>;
@@ -45,12 +45,14 @@ const MultiSelect = (props: MultiSelectProps) => {
 
   return (
     <div>
-      <div className="px-2 py-1 bg-sandstone-50">
-        <p className="text-lg font-bold">{props.title}</p>
-        <div className="flex justify-between text-sm">
-          {props.description && (
-            <p className="text-sandstone-400">{props.description}</p>
-          )}
+      <div className="px-2 py-1 bg-sandstone-50 relative">
+        {props.title && (
+          <p className="text-lg font-bold text-sandstone-300">{props.title}</p>
+        )}
+        {props.description && (
+          <p className="text-sandstone-400 text-sm">{props.description}</p>
+        )}
+        <div className="absolute right-0 bottom-0.5">
           {areAllSelected() && (
             <button
               className="text-teal-500 text-xs"

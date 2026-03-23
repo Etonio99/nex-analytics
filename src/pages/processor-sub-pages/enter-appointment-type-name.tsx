@@ -34,7 +34,10 @@ const EnterAppointmentTypeName = (props: ProcessSubPageProps) => {
   };
 
   return (
-    <ProcessorSubPage title="Enter Appointment Type Name">
+    <ProcessorSubPage
+      title="Enter Appointment Type Name"
+      description="Enter the name of the appointment type you want to check availability for exactly as it appears in your NexHealth."
+    >
       <Input
         label="Appointment Type Name"
         placeholder="New Patient Cleaning"

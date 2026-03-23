@@ -30,7 +30,10 @@ const EnterSubdomain = (props: ProcessSubPageProps) => {
   };
 
   return (
-    <ProcessorSubPage title="Enter Subdomain">
+    <ProcessorSubPage
+      title="Enter Subdomain"
+      description='Enter the subdomain for the institution you want analytics from. This is most commonly the name of the practice with all lowercase letters and dashes instead of spaces ("My Dental Practice" -> "my-dental-practice").'
+    >
       <Input
         label="Subdomain"
         placeholder="my-institution-subdomain"
