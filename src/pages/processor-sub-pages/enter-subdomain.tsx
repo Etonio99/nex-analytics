@@ -5,8 +5,11 @@ import Input from '../../components/input';
 import { BiBuildings } from 'react-icons/bi';
 import { ProcessSubPageProps } from '../../types/process-sub-page-props';
 import { interruptMessages } from '../../types/processor-interrupt';
+import { useNotificationContext } from '../../components/contexts/notification-context';
 
 const EnterSubdomain = (props: ProcessSubPageProps) => {
+  const { notify } = useNotificationContext();
+
   const getInitialSubdomain = (): string => {
     if (props.advanceResult?.interrupt?.type === 'MISSING_SUBDOMAIN') {
       if (props.advanceResult.interrupt.resolutionData?.type === 'STRING') {
@@ -22,6 +25,7 @@ const EnterSubdomain = (props: ProcessSubPageProps) => {
 
   const continueProcess = async () => {
     if (!subdomainInput) {
+      notify('Missing Subdomain', 'Please enter a subdomain to continue.');
       return;
     }
 

@@ -6,14 +6,18 @@ import Input from '../../components/input';
 import { BiSolidKey } from 'react-icons/bi';
 import { ProcessSubPageProps } from '../../types/process-sub-page-props';
 import { interruptMessages } from '../../types/processor-interrupt';
+import { useNotificationContext } from '../../components/contexts/notification-context';
 
 const CheckApiKey = (props: ProcessSubPageProps) => {
+  const { notify } = useNotificationContext();
+
   const [apiKeyInput, setApiKeyInput] = useState<string>('');
 
   const { setApiKey } = useApiKey();
 
   const continueProcess = async () => {
     if (!apiKeyInput) {
+      notify('Missing API Key', 'Please enter an API key to continue.');
       return;
     }
 

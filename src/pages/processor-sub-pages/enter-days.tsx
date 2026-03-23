@@ -5,8 +5,11 @@ import Input from '../../components/input';
 import { BiCalendar } from 'react-icons/bi';
 import { ProcessSubPageProps } from '../../types/process-sub-page-props';
 import { interruptMessages } from '../../types/processor-interrupt';
+import { useNotificationContext } from '../../components/contexts/notification-context';
 
 const EnterDays = (props: ProcessSubPageProps) => {
+  const { notify } = useNotificationContext();
+
   const getInitialDays = (): string => {
     if (props.advanceResult?.interrupt?.type === 'MISSING_DAYS') {
       if (props.advanceResult.interrupt.resolutionData?.type === 'NUMBER') {
@@ -20,20 +23,28 @@ const EnterDays = (props: ProcessSubPageProps) => {
 
   const continueProcess = async () => {
     if (!days) {
+      notify('Missing Days', 'Please enter the number of days to continue.');
       return;
     }
 
     try {
+      if (!days.match(/^\d+$/)) {
+        notify('Invalid Value', 'The "days" value must be a number.');
+        return;
+      }
       const parsedDays = parseInt(days);
       if (Number.isNaN(parsedDays)) {
-        throw new Error('Days value is not a number');
+        notify('Invalid Value', 'The "days" value must be a number.');
+        return;
       }
       if (parsedDays > 60) {
-        throw new Error('Days can not be longer than 60');
+        notify('Invalid value', 'The "days" value must be a number.');
+        return;
       }
       await props.appActions.updateProcessorData({ days: parsedDays });
       await props.appActions.advanceProcessor();
     } catch (error) {
+      notify('Internal Error', 'Error while processing the "days" value.');
       console.error(error);
     }
   };

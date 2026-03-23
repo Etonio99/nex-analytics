@@ -4,8 +4,11 @@ import ProcessorSubPage from './processor-sub-page';
 import Button from '../../components/button';
 import MultiSelect, { MultiSelectItem } from '../../components/multi-select';
 import { BiRightArrowAlt } from 'react-icons/bi';
+import { useNotificationContext } from '../../components/contexts/notification-context';
 
 const SelectLocations = (props: ProcessSubPageProps) => {
+  const { notify } = useNotificationContext();
+
   const getInitialSelectedLocations = (): number[] => {
     if (props.advanceResult?.interrupt?.type === 'LOCATION_REQUIRED') {
       if (props.advanceResult.interrupt.resolutionData?.type === 'LOCATIONS') {
@@ -26,6 +29,14 @@ const SelectLocations = (props: ProcessSubPageProps) => {
     const selected_location_ids = Object.entries(locationSelection)
       .filter(([_, selected]) => selected)
       .map(([id, _]) => parseInt(id));
+
+    if (selected_location_ids.length <= 0) {
+      notify(
+        'Missing Locations',
+        'Please select at least one location to continue.'
+      );
+    }
+
     await props.appActions.updateProcessorData({ selected_location_ids });
     await props.appActions.advanceProcessor();
   };

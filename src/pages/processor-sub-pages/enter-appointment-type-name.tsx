@@ -5,8 +5,11 @@ import Input from '../../components/input';
 import { BiRename } from 'react-icons/bi';
 import { ProcessSubPageProps } from '../../types/process-sub-page-props';
 import { interruptMessages } from '../../types/processor-interrupt';
+import { useNotificationContext } from '../../components/contexts/notification-context';
 
 const EnterAppointmentTypeName = (props: ProcessSubPageProps) => {
+  const { notify } = useNotificationContext();
+
   const getInitialAppointmentTypeName = (): string => {
     if (
       props.advanceResult?.interrupt?.type === 'MISSING_APPOINTMENT_TYPE_NAME'
@@ -24,6 +27,10 @@ const EnterAppointmentTypeName = (props: ProcessSubPageProps) => {
 
   const continueProcess = async () => {
     if (!appointmentTypeName) {
+      notify(
+        'Missing Appointment Type Name',
+        'Please enter an appointment type name to continue.'
+      );
       return;
     }
 
