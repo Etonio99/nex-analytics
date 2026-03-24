@@ -32,6 +32,13 @@ const Help = (props: HelpProps) => {
           <BiListCheck size={28} className="text-sandstone-400" />
           <p className="text-sm">Visit the FAQ</p>
         </button>
+        <button
+          onClick={() => props.navigate('not-found')}
+          className="flex flex-col w-42 h-18 gap-1 justify-center items-center rounded-sm outline outline-sandstone-300 px-3 py-2 hover:bg-sandstone-100 hover:-translate-y-1 shadow shadow-sandstone-900/20 transition-transform"
+        >
+          <BiListCheck size={28} className="text-sandstone-400" />
+          <p className="text-sm">Test</p>
+        </button>
       </div>
 
       <button

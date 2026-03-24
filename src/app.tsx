@@ -7,6 +7,7 @@ import './css/app.css';
 import { useState } from 'react';
 import Help from './pages/help';
 import GettingStarted from './pages/getting-started';
+import NotFound from './pages/not-found';
 const App = () => {
   const [page, setPage] = useState('home');
 
@@ -23,7 +24,7 @@ const App = () => {
       case 'process':
         return <Process navigate={setPage} />;
     }
-    return null;
+    return <NotFound navigate={setPage} />;
   };
 
   return (
