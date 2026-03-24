@@ -16,9 +16,9 @@ const Accordion = (props: AccordionProps) => {
     <div className="rounded-md overflow-hidden">
       <div
         onClick={() => setOpen(!open)}
-        className="text-sandstone-800 flex justify-between items-center cursor-pointer mb-1"
+        className="text-sandstone-800 flex justify-between cursor-pointer mb-1"
       >
-        {props.icon}
+        <div className="grid place-items-center h-fit py-2">{props.icon}</div>
         <span className="flex w-full h-full items-center hover:bg-sandstone-100 rounded-sm pr-2 py-1 ml-2">
           <p className="font-bold w-full ml-2 text-left">{props.label}</p>
           <div
@@ -33,7 +33,7 @@ const Accordion = (props: AccordionProps) => {
       >
         <div className="min-h-0">
           <div className="bg-sandstone-200 rounded-md">
-            <p className="p-2">{props.text}</p>
+            <p className="p-2 text-sm">{props.text}</p>
           </div>
         </div>
       </div>

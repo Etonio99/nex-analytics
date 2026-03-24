@@ -2,7 +2,10 @@ import {
   BiAbacus,
   BiArrowBack,
   BiMoneyWithdraw,
+  BiSolidBarChartSquare,
+  BiSolidHelpCircle,
   BiSolidKey,
+  BiSolidLock,
   BiSolidUser,
 } from 'react-icons/bi';
 import Accordion from '../components/accordion';
@@ -15,32 +18,31 @@ const FAQ = (props: FAQProps) => {
   return (
     <div className="max-w-xl m-auto space-y-1 h-full flex flex-col">
       <h1 className="text-4xl font-bold mb-4 text-sandstone-300">FAQ</h1>
-      <div className="overflow-y-auto flex-1 min-h-0">
-        <p>
-          This page contains commonly asked questions about the Nex Analytics
-          tool, the NexHealth API, and more.
-        </p>
-
-        <h2 className="text-sandstone-500 mt-6">API Keys</h2>
+      <p>
+        This page contains commonly asked questions about the Nex Analytics
+        tool, the NexHealth API, and more.
+      </p>
+      <div className="overflow-y-scroll flex-1 min-h-0 space-y-1 border-y border-sandstone-200 mt-3 pb-3 pr-2">
+        <h2 className="text-sandstone-500 mt-3">API Keys</h2>
         <Accordion
-          icon={<BiSolidKey />}
+          icon={<BiSolidHelpCircle />}
           label="What is an API key?"
-          text="IDK, ask me later"
+          text="An API key is a code used to authenticate requests made through the NexHealth API. It ties the request back to the user who made the request. An API key is required to use this tool."
         />
         <Accordion
           icon={<BiSolidKey />}
           label="How do I get an API key?"
-          text="IDK, ask me later"
+          text="You can sign up for the NexHealth API at https://developers.nexhealth.com/signup. An API key will be provided after signing up."
         />
         <Accordion
-          icon={<BiSolidKey />}
+          icon={<BiSolidLock />}
           label="It says I don't have access to my subdomain. How do I gain access?"
-          text="IDK, ask me later"
+          text="By default, API keys will not allow you to access any practice. Instead, authorization will need to be granted per location. To gain access to a location, NexHealth will need an email to developers@nexhealth.com from an adminsitrator at the practice authorizing the access. Please include the address of the location as well."
         />
 
         <h2 className="text-sandstone-500 mt-6">Understanding the Data</h2>
         <Accordion
-          icon={<BiSolidKey />}
+          icon={<BiSolidBarChartSquare />}
           label="Why is my report different than what I see in my EHR?"
           text="IDK, ask me later"
         />
