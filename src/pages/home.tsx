@@ -2,6 +2,7 @@
 
 import { BiLogoGithub, BiSolidCog, BiSolidHelpCircle } from 'react-icons/bi';
 import { useProcessor } from '../hooks/useProcessor';
+import Tooltip from '../components/tooltip';
 
 interface HomeProps {
   navigate: (page: string) => void;
@@ -35,27 +36,37 @@ const Home = (props: HomeProps) => {
         </p>
       </button>
       <div className="flex flex-col gap-1 absolute bottom-4 right-4">
-        <button className="group p-2 rounded-sm text-sandstone-500 hover:bg-sandstone-100 grid place-items-center">
-          <BiLogoGithub
-            size={28}
-            className="group-hover:rotate-12 transition-transform group-hover:text-sandstone-600"
-          />
-        </button>
-        <button className="group p-2 rounded-sm text-sandstone-500 hover:bg-sandstone-100 grid place-items-center">
-          <BiSolidCog
-            size={28}
-            className="group-hover:rotate-12 transition-transform group-hover:text-sandstone-600"
-          />
-        </button>
-        <button
-          onClick={() => props.navigate('help')}
-          className="group p-2 rounded-sm text-sandstone-500 hover:bg-sandstone-100 grid place-items-center"
-        >
-          <BiSolidHelpCircle
-            size={28}
-            className="group-hover:rotate-12 transition-transform group-hover:text-sandstone-600"
-          />
-        </button>
+        <Tooltip label="GitHub">
+          <a
+            href="https://github.com/Etonio99/nex-analytics"
+            target="_blank"
+            className="group p-2 rounded-sm text-sandstone-500 hover:bg-sandstone-100 grid place-items-center"
+          >
+            <BiLogoGithub
+              size={28}
+              className="group-hover:rotate-12 transition-transform group-hover:text-sandstone-600"
+            />
+          </a>
+        </Tooltip>
+        <Tooltip label="Settings">
+          <button className="group p-2 rounded-sm text-sandstone-500 hover:bg-sandstone-100 grid place-items-center">
+            <BiSolidCog
+              size={28}
+              className="group-hover:rotate-12 transition-transform group-hover:text-sandstone-600"
+            />
+          </button>
+        </Tooltip>
+        <Tooltip label="Help">
+          <button
+            onClick={() => props.navigate('help')}
+            className="group p-2 rounded-sm text-sandstone-500 hover:bg-sandstone-100 grid place-items-center"
+          >
+            <BiSolidHelpCircle
+              size={28}
+              className="group-hover:rotate-12 transition-transform group-hover:text-sandstone-600"
+            />
+          </button>
+        </Tooltip>
       </div>
     </div>
   );
