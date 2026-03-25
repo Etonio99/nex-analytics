@@ -48,14 +48,6 @@ const Home = (props: HomeProps) => {
             />
           </a>
         </Tooltip>
-        <Tooltip label="Settings">
-          <button className="group p-2 rounded-sm text-sandstone-500 hover:bg-sandstone-100 grid place-items-center">
-            <BiSolidCog
-              size={28}
-              className="group-hover:rotate-12 transition-transform group-hover:text-sandstone-600"
-            />
-          </button>
-        </Tooltip>
         <Tooltip label="Help">
           <button
             onClick={() => props.navigate('help')}
