@@ -1,0 +1,76 @@
+@reference './app.css';
+
+.content {
+  @apply text-sandstone-950;
+}
+
+/* Horizontal Rule */
+.content hr {
+  @apply text-sandstone-200 mt-2;
+}
+
+/* Headers */
+.content h1,
+.content h2,
+.content h3,
+.content h4,
+.content h5,
+.content h6 {
+  @apply font-bold text-sandstone-600;
+}
+
+.content h1 {
+  @apply text-4xl text-sandstone-300;
+}
+
+.content h2 {
+  @apply text-3xl text-sandstone-400;
+}
+
+.content h3 {
+  @apply text-2xl text-sandstone-500;
+}
+
+.content h4 {
+  @apply text-xl;
+}
+
+.content h5 {
+  @apply text-lg;
+}
+
+/* Lists */
+.content ol,
+.content ul {
+  @apply list-inside pl-4 marker:text-sandstone-500;
+}
+
+.content ol ol,
+.content ol ul,
+.content ul ol,
+.content ul ul {
+  @apply list-inside pl-4;
+}
+
+.content ol {
+  @apply list-decimal;
+}
+
+.content ul {
+  @apply list-disc;
+}
+
+/* Code */
+.content code {
+  @apply bg-sandstone-200/30 rounded-md px-1 py-0.5 text-sandstone-700;
+}
+
+/* Blockquote */
+.content blockquote {
+  @apply border-l-4 border-l-sandstone-300 pl-2;
+}
+
+/* Links */
+.content a {
+  @apply text-teal-500;
+}

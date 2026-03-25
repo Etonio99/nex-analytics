@@ -1,4 +1,5 @@
 import { BiArrowBack } from 'react-icons/bi';
+import MarkdownFile from '../components/markdown-file';
 
 interface GettingStartedProps {
   navigate: (page: string) => void;
@@ -10,6 +11,8 @@ const GettingStarted = (props: GettingStartedProps) => {
       <h1 className="text-4xl font-bold mb-4 text-sandstone-300">
         Getting Started
       </h1>
+
+      <MarkdownFile filePath="getting-started.md" />
 
       <button
         onClick={() => props.navigate('help')}
