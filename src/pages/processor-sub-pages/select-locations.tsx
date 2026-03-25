@@ -85,6 +85,7 @@ const SelectLocations = (props: ProcessSubPageProps) => {
             label: location.name,
             description,
             uniqueKey: location.id,
+            displayUniqueKey: true,
           } as MultiSelectItem;
         })}
         note={

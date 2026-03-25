@@ -4,6 +4,7 @@ export type MultiSelectItem = {
   label: string;
   description: string;
   uniqueKey: number;
+  displayUniqueKey?: boolean;
   checked?: boolean;
 };
 
@@ -81,12 +82,13 @@ const MultiSelect = (props: MultiSelectProps) => {
               description={item.description}
               checked={!!props.value[item.uniqueKey]}
               onChange={handleChange}
+              displayUniqueKey={item.displayUniqueKey}
             />
           ))}
         </ul>
       </div>
       <div
-        className={`flex  mt-2 ${props.note ? 'justify-between' : 'justify-end'}`}
+        className={`flex mt-2 ${props.note ? 'justify-between' : 'justify-end'}`}
       >
         {props.note}
         <p className="text-xs text-sandstone-300">{`${selectedCount()} of ${Object.keys(props.value).length} selected`}</p>
@@ -99,6 +101,7 @@ interface MultiSelectItemProps {
   label: string;
   description: string;
   uniqueKey: number;
+  displayUniqueKey?: boolean;
   checked: boolean;
   onChange: (key: number) => void;
 }
@@ -111,7 +114,7 @@ const MultiSelectItem = (props: MultiSelectItemProps) => {
   return (
     <li
       onClick={toggle}
-      className={`${props.checked ? 'shadow-sandstone-950/25' : 'brightness-80 shadow-sandstone-950/15'} bg-sandstone-50 grid grid-cols-[40px_1fr] rounded-sm overflow-hidden shadow cursor-pointer`}
+      className={`${props.checked ? 'shadow-sandstone-950/25' : 'brightness-80 shadow-sandstone-950/15'} relative bg-sandstone-50 grid grid-cols-[40px_1fr] rounded-sm overflow-hidden shadow cursor-pointer`}
     >
       <div className="grid place-items-center bg-sandstone-100">
         <input
@@ -131,6 +134,11 @@ const MultiSelectItem = (props: MultiSelectItemProps) => {
         <p className="text-sandstone-300 relative bottom-0.5">
           {props.description}
         </p>
+        {props.displayUniqueKey && (
+          <p className="absolute top-1 right-1 text-xs text-sandstone-200">
+            {props.uniqueKey}
+          </p>
+        )}
       </div>
     </li>
   );
