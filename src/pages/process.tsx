@@ -16,6 +16,7 @@ import EnterAppointmentTypeName from './processor-sub-pages/enter-appointment-ty
 import Confirmation from './processor-sub-pages/confirmation';
 import Loading from './processor-sub-pages/loading';
 import Complete from './processor-sub-pages/complete';
+import { useNotificationContext } from '../components/contexts/notification-context';
 
 interface ProcessProps {
   navigate: (page: string) => void;
@@ -30,6 +31,8 @@ export type AppActions = {
 };
 
 const Process = (props: ProcessProps) => {
+  const { notify } = useNotificationContext();
+
   const [advanceResult, setAdvanceResult] = useState<
     ProcessorAdvanceResult | undefined
   >(undefined);
@@ -47,10 +50,28 @@ const Process = (props: ProcessProps) => {
       const response = await advanceProcessor();
       console.log(response);
       setAdvanceResult(response);
+      handleAdvanceResult(response);
       return true;
     } catch (error) {
       console.error(error);
       return false;
+    }
+  };
+
+  const handleAdvanceResult = (result: ProcessorAdvanceResult | undefined) => {
+    const interrupt = result?.interrupt;
+    if (!interrupt) return;
+
+    if (
+      interrupt.type === 'PERMISSION_DENIED' &&
+      interrupt.resolutionData?.type === 'STRING' &&
+      interrupt.resolutionData.payload === 'subdomain'
+    ) {
+      notify(
+        'Permission Denied',
+        'You do not have permission to access this subdomain'
+      );
+      jump('EnterSubdomain');
     }
   };
 
@@ -107,8 +128,6 @@ const Process = (props: ProcessProps) => {
       return <Loading message={progressMessage} />;
     }
 
-    console.log(stepName);
-
     switch (stepName) {
       case 'CheckApiKey':
         return (
@@ -149,14 +168,6 @@ const Process = (props: ProcessProps) => {
         );
     }
   };
-
-  if (advanceResult?.interrupt?.type == 'PERMISSION_DENIED') {
-    switch (advanceResult.interrupt.resolutionData?.payload) {
-      case 'subdomain':
-        jump('EnterSubdomain');
-        break;
-    }
-  }
 
   return (
     <div className="h-full max-w-2xl m-auto grid place-items-center">
