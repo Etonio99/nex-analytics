@@ -16,7 +16,7 @@ const MarkdownFile = (props: MarkdownFileProps) => {
   }, [props.filePath]);
 
   return (
-    <div className="content">
+    <div className="content max-h-full h-full overflow-y-scroll rounded-md shadow-xl shadow-sandstone-950/20 p-4 bg-sandstone-50 border-4 border-sandstone-500">
       <ReactMarkdown>{content}</ReactMarkdown>
     </div>
   );

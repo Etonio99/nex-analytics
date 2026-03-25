@@ -7,6 +7,7 @@ interface GettingStartedProps {
 
 const GettingStarted = (props: GettingStartedProps) => {
   return (
+    // <div className="w-full h-full bg-sandstone-600 rounded-xl">
     <div className="max-w-xl m-auto space-y-1 h-full flex flex-col">
       <h1 className="text-4xl font-bold mb-4 text-sandstone-300">
         Getting Started
@@ -21,6 +22,7 @@ const GettingStarted = (props: GettingStartedProps) => {
         <BiArrowBack /> Back
       </button>
     </div>
+    // </div>
   );
 };
 
