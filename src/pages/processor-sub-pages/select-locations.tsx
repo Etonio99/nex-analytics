@@ -66,7 +66,6 @@ const SelectLocations = (props: ProcessSubPageProps) => {
       appActions={props.appActions}
     >
       <MultiSelect
-        // title="Select locations"
         description="Select any number of locations below"
         value={locationSelection}
         onChange={setLocationSelection}
