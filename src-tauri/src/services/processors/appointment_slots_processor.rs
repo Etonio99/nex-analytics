@@ -44,6 +44,7 @@ pub struct AppointmentSlotsProcessor {
     pub target_step: Option<ProcessStep>,
     pub data: AppointmentSlotsProcessorData,
     pub file_path: Option<String>,
+    pub api_call_count: u32,
 }
 
 #[derive(Debug, Deserialize)]
@@ -75,6 +76,7 @@ impl AppointmentSlotsProcessor {
                 completion_acknowledged: Some(false),
             },
             file_path: None,
+            api_call_count: 0,
         }
     }
 
@@ -141,6 +143,7 @@ impl AppointmentSlotsProcessor {
                             ))
                         })?;
 
+                    self.api_call_count += 1;
                     if !locations_response.code {
                         if let Some(e) = locations_response.error {
                             if e.contains(
@@ -332,6 +335,7 @@ impl AppointmentSlotsProcessor {
                             e.to_string(),
                         ))
                     })?;
+                self.api_call_count += 1;
 
                 if !appointment_types_response.code {
                     println!("API call failed: {:#?}", appointment_types_response);
@@ -373,6 +377,7 @@ impl AppointmentSlotsProcessor {
                             e.to_string(),
                         ))
                     })?;
+                self.api_call_count += 1;
 
                 if !providers_response.code {
                     println!("API call failed: {:#?}", providers_response);
@@ -404,6 +409,7 @@ impl AppointmentSlotsProcessor {
                             e.to_string(),
                         ))
                     })?;
+                self.api_call_count += 1;
 
                 if !appointment_slots_response.code {
                     println!("API call failed: {:#?}", appointment_slots_response);
@@ -532,6 +538,8 @@ impl AppointmentSlotsProcessor {
         )?;
         worksheet.write(5, 0, "Subdomain")?;
         worksheet.write(5, 1, subdomain)?;
+        worksheet.write(6, 0, "API Calls")?;
+        worksheet.write(6, 1, self.api_call_count)?;
 
         for location_slot_data in data {
             let worksheet = workbook.add_worksheet();
