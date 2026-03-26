@@ -57,12 +57,12 @@ const FAQ = (props: FAQProps) => {
         <Accordion
           icon={<BiAbacus />}
           label="How many API calls will this make?"
-          text="IDK, ask me later"
+          text="This can depend on the analytics you are collecting. An API call will be made to get a list of locations within a subdomain, to get available slots per location, etc. The exported reports will tell you the number of API calls that were made while collecting the data."
         />
         <Accordion
           icon={<BiMoneyWithdraw />}
           label="How much does this cost?"
-          text="IDK, ask me later"
+          text="By default, the API costs $0.10 per API call. The current pricing can be found at https://synchronizer.io/pricing."
         />
         <Accordion
           icon={<BiSolidUser />}
