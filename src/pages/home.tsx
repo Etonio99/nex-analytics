@@ -3,6 +3,7 @@
 import { BiLogoGithub, BiSolidHelpCircle } from 'react-icons/bi';
 import { useProcessor } from '../hooks/useProcessor';
 import Tooltip from '../components/tooltip';
+import { useNotificationContext } from '../components/contexts/notification-context';
 
 interface HomeProps {
   navigate: (page: string) => void;
@@ -10,10 +11,17 @@ interface HomeProps {
 
 const Home = (props: HomeProps) => {
   const { setProcessor } = useProcessor();
+  const { notify } = useNotificationContext();
 
-  const click = async () => {
-    const response = await setProcessor('appointment_slots');
-    console.log(response);
+  const selectProcessor = async (processName: string) => {
+    const response = await setProcessor(processName);
+    if (!response) {
+      notify(
+        'Failed to start process',
+        'Something went wrong starting this process'
+      );
+      return;
+    }
     props.navigate('process');
   };
 
@@ -23,18 +31,25 @@ const Home = (props: HomeProps) => {
         Nex Analytics
       </h1>
 
-      <button
-        onClick={click}
-        className="text-left shadow shadow-sandstone-900/20 rounded-md border border-sandstone-300 px-4 pt-2 pb-3 hover:bg-sandstone-100 hover:-translate-y-1 transition-transform cursor-pointer"
-      >
-        <h3 className="font-bold text-sandstone-400 text-xl">
-          Appointment Slots Report
-        </h3>
-        <p>
-          Export appointment slots for any number of locations within the next X
-          days.
-        </p>
-      </button>
+      <div className="space-y-4">
+        <button
+          onClick={() => selectProcessor('appointment_slots')}
+          className="text-left shadow shadow-sandstone-900/20 rounded-md border border-sandstone-300 px-4 pt-2 pb-3 hover:bg-sandstone-100 hover:-translate-y-1 transition-transform cursor-pointer"
+        >
+          <h3 className="font-bold text-sandstone-400 text-xl">
+            Appointment Slots Report
+          </h3>
+          <p>
+            Export appointment slots for any number of locations within the next
+            X days.
+          </p>
+        </button>
+        <div className="text-center">
+          <p className="text-sandstone-300 text-sm italic">
+            No other items to show...
+          </p>
+        </div>
+      </div>
       <div className="flex flex-col gap-1 absolute bottom-4 right-4">
         <Tooltip label="GitHub">
           <a
