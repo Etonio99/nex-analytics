@@ -52,7 +52,13 @@ const Confirmation = (props: ProcessSubPageProps) => {
   };
 
   return (
-    <ProcessorSubPage title="Confirmation" appActions={props.appActions}>
+    <ProcessorSubPage
+      title="Confirmation"
+      titleIcon={
+        <img src="nexie/nexie-search.png" className="pixelated h-10" />
+      }
+      appActions={props.appActions}
+    >
       <p>
         Please confirm that all of the provided information is correct before
         proceeding.

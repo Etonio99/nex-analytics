@@ -2,7 +2,7 @@ import ProcessorSubPage from './processor-sub-page';
 import useFileSystem from '../../hooks/useFileSystem';
 import { ProcessSubPageProps } from '../../types/process-sub-page-props';
 import Button from '../../components/button';
-import { BiCheckDouble, BiLinkExternal } from 'react-icons/bi';
+import { BiLinkExternal } from 'react-icons/bi';
 
 const Complete = (props: ProcessSubPageProps) => {
   const { revealFileOrDirectory } = useFileSystem();
@@ -19,7 +19,9 @@ const Complete = (props: ProcessSubPageProps) => {
   return (
     <ProcessorSubPage
       title="Process Complete"
-      titleIcon={<BiCheckDouble size={42} />}
+      titleIcon={
+        <img src="nexie/nexie-celebrate.png" className="pixelated h-10" />
+      }
       appActions={props.appActions}
       hideCancelButton
     >

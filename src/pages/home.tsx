@@ -27,9 +27,12 @@ const Home = (props: HomeProps) => {
 
   return (
     <div className="max-w-xl m-auto">
-      <h1 className="text-4xl font-bold mb-4 text-sandstone-300">
-        Nex Analytics
-      </h1>
+      <div className="flex gap-3">
+        <img src="nexie/nexie-wave.png" className="pixelated h-10" />
+        <h1 className="text-4xl font-bold mb-4 text-sandstone-300">
+          Nex Analytics
+        </h1>
+      </div>
 
       <div className="space-y-4">
         <button
