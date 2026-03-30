@@ -2,7 +2,7 @@ import { useState } from 'react';
 import Button from '../../components/button';
 import ProcessorSubPage from './processor-sub-page';
 import Input from '../../components/input';
-import { BiCalendar } from 'react-icons/bi';
+import { BiCalendarPlus } from 'react-icons/bi';
 import { ProcessSubPageProps } from '../../types/process-sub-page-props';
 import { useNotificationContext } from '../../components/contexts/notification-context';
 
@@ -57,7 +57,7 @@ const EnterDays = (props: ProcessSubPageProps) => {
       <Input
         label="Days"
         placeholder="7"
-        icon={<BiCalendar />}
+        icon={<BiCalendarPlus />}
         value={days}
         onChange={(e) => setDays(e.target.value)}
       />

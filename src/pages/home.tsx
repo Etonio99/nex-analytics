@@ -44,11 +44,6 @@ const Home = (props: HomeProps) => {
             X days.
           </p>
         </button>
-        <div className="text-center">
-          <p className="text-sandstone-300 text-sm italic">
-            No other items to show...
-          </p>
-        </div>
       </div>
       <div className="flex flex-col gap-1 absolute bottom-4 right-4">
         <Tooltip label="GitHub">

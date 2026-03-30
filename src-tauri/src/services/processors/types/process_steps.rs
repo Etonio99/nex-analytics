@@ -7,6 +7,7 @@ pub enum ProcessStep {
     FetchLocations,
     SelectLocations,
     EnterAppointmentTypeName,
+    EnterStartDate,
     EnterDays,
     Confirmation,
     Processing,

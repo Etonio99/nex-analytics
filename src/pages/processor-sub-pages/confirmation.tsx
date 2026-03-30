@@ -27,6 +27,8 @@ const Confirmation = (props: ProcessSubPageProps) => {
         return 'EnterSubdomain';
       case 'locations_count':
         return 'SelectLocations';
+      case 'start_date':
+        return 'EnterStartDate';
       case 'days':
         return 'EnterDays';
       case 'appointment_type_name':

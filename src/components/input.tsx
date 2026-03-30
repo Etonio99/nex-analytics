@@ -5,6 +5,7 @@ interface InputProps {
   placeholder: string;
   icon?: React.ReactNode;
   value?: string;
+  type?: 'text' | 'number' | 'date';
   onChange?: ChangeEventHandler<HTMLInputElement, HTMLInputElement>;
 }
 
@@ -15,7 +16,7 @@ const Input = (props: InputProps) => {
       <div className="p-2 rounded-sm bg-sandstone-100 flex gap-1 outline focus-within:outline-4 outline-sandstone-200 items-center">
         {props.icon}
         <input
-          type="text"
+          type={props.type ?? 'text'}
           placeholder={props.placeholder}
           autoComplete="off"
           className="w-full outline-none"

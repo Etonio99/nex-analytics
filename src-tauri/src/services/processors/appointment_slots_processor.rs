@@ -1,7 +1,7 @@
 use std::{collections::HashMap, fmt::format, fs, path::PathBuf, sync::Arc};
 
 use async_trait::async_trait;
-use chrono::{Duration, Local};
+use chrono::{Duration, Local, NaiveDate};
 use rust_xlsxwriter::{
     workbook::Workbook, Color, Format, FormatAlign, FormatBorder, Table, TableColumn,
     TableFunction, XlsxError,
@@ -52,6 +52,7 @@ pub struct AppointmentSlotsProcessorData {
     pub confirmed: Option<bool>,
     pub locations: Option<Vec<Location>>,
     pub selected_location_ids: Option<Vec<u32>>,
+    pub start_date: Option<String>,
     pub days: Option<u32>,
     pub appointment_type_name: Option<String>,
     pub operatories: Option<Vec<Operatory>>,
@@ -69,6 +70,7 @@ impl AppointmentSlotsProcessor {
                 confirmed: Some(false),
                 locations: None,
                 selected_location_ids: None,
+                start_date: None,
                 days: None,
                 appointment_type_name: None,
                 operatories: None,
@@ -176,6 +178,12 @@ impl AppointmentSlotsProcessor {
                         }),
                     )));
                 };
+                self.current_step = ProcessStep::EnterStartDate;
+            }
+            ProcessStep::EnterStartDate => {
+                let Some(_) = self.data.start_date else {
+                    return Err(ProcessorInterrupt::MissingStartDate(None));
+                };
                 self.current_step = ProcessStep::EnterDays;
             }
             ProcessStep::EnterDays => {
@@ -204,6 +212,7 @@ impl AppointmentSlotsProcessor {
                         InterruptResolutionData::Confirmation(DataConfirmation {
                             subdomain: guard.subdomain.clone(),
                             locations_count,
+                            start_date: self.data.start_date.clone(),
                             days: self.data.days,
                             appointment_type_name: self.data.appointment_type_name.clone(),
                         }),
@@ -252,6 +261,9 @@ impl AppointmentSlotsProcessor {
                     selected_location_ids: self.data.selected_location_ids.clone(),
                 }),
             )),
+            ProcessStep::EnterStartDate => {
+                ProcessorInterrupt::MissingStartDate(self.wrap_str(&self.data.start_date))
+            }
             ProcessStep::EnterDays => {
                 ProcessorInterrupt::MissingDays(self.wrap_num(self.data.days))
             }
@@ -297,13 +309,21 @@ impl AppointmentSlotsProcessor {
             ));
         };
 
+        let Some(start_date) = self.data.start_date.as_ref() else {
+            return Err(ProcessorInterrupt::InternalError(
+                InterruptResolutionData::String("Start date is missing".into()),
+            ));
+        };
+
         let Some(days) = self.data.days.as_ref() else {
             return Err(ProcessorInterrupt::InternalError(
                 InterruptResolutionData::String("Days is missing".into()),
             ));
         };
 
-        let start_date = Local::now().date_naive();
+        let start_date = NaiveDate::parse_from_str(start_date, "%Y-%m-%d").map_err(|e| {
+            ProcessorInterrupt::InternalError(InterruptResolutionData::String(e.to_string()))
+        })?;
 
         let mut counter = 0;
         if let Some(location_ids) = self.data.selected_location_ids.clone() {
@@ -644,6 +664,9 @@ impl Processor for AppointmentSlotsProcessor {
         }
         if let Some(l) = input.selected_location_ids {
             self.data.selected_location_ids = Some(l);
+        }
+        if let Some(s) = input.start_date {
+            self.data.start_date = Some(s);
         }
         if let Some(d) = input.days {
             self.data.days = Some(d);

@@ -17,6 +17,7 @@ import Confirmation from './processor-sub-pages/confirmation';
 import Loading from './processor-sub-pages/loading';
 import Complete from './processor-sub-pages/complete';
 import { useNotificationContext } from '../components/contexts/notification-context';
+import EnterStartDate from './processor-sub-pages/enter-start-date';
 
 interface ProcessProps {
   navigate: (page: string) => void;
@@ -143,6 +144,13 @@ const Process = (props: ProcessProps) => {
       case 'SelectLocations':
         return (
           <SelectLocations
+            appActions={appActions}
+            advanceResult={advanceResult}
+          />
+        );
+      case 'EnterStartDate':
+        return (
+          <EnterStartDate
             appActions={appActions}
             advanceResult={advanceResult}
           />

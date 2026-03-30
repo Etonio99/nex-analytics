@@ -17,6 +17,7 @@ pub enum ProcessorInterrupt {
     MissingSubdomain(Option<InterruptResolutionData>),
     LocationRequired(Option<InterruptResolutionData>),
     NoLocationsFound,
+    MissingStartDate(Option<InterruptResolutionData>),
     MissingDays(Option<InterruptResolutionData>),
     MissingAppointmentTypeName(Option<InterruptResolutionData>),
     NeedsConfirmation(InterruptResolutionData),

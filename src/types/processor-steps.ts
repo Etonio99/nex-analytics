@@ -3,6 +3,7 @@ export type ProcessStep =
   | 'EnterSubdomain'
   | 'FetchLocations'
   | 'SelectLocations'
+  | 'EnterStartDate'
   | 'EnterDays'
   | 'EnterAppointmentTypeName'
   | 'Confirmation'
