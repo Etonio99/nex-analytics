@@ -539,6 +539,8 @@ impl AppointmentSlotsProcessor {
 
         let worksheet = workbook.add_worksheet();
         worksheet.set_name("Summary")?;
+        worksheet.set_column_width(0, 20)?;
+        worksheet.set_column_width(1, 30)?;
         worksheet.write_with_format(0, 0, "Summary", &format_bold)?;
         worksheet.write(1, 0, "Processor")?;
         worksheet.write(1, 1, "Available Slots")?;
@@ -591,10 +593,10 @@ impl AppointmentSlotsProcessor {
             }
 
             worksheet.write(0, 0, "Date")?;
-            worksheet.set_column_width(0, 16)?;
+            worksheet.set_column_width(0, 14)?;
 
             worksheet.write(0, 1, "Available Slots")?;
-            worksheet.set_column_width(1, 22)?;
+            worksheet.set_column_width(1, 14)?;
 
             let columns = vec![
                 TableColumn::new()
