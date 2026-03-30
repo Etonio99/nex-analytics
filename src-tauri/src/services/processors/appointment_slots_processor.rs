@@ -601,7 +601,7 @@ impl AppointmentSlotsProcessor {
             let columns = vec![
                 TableColumn::new()
                     .set_header("Date")
-                    .set_total_label("Totals"),
+                    .set_total_label("Total"),
                 TableColumn::new()
                     .set_header("Available Slots")
                     .set_total_function(TableFunction::Sum),
