@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "nex-analytics",
+  "productName": "Nex Analytics",
   "version": "0.1.0",
   "identifier": "com.ebrei.nex-analytics",
   "build": {
