@@ -15,7 +15,7 @@ const EnterStartDate = (props: ProcessSubPageProps) => {
         return props.advanceResult.interrupt.resolutionData.payload.toString();
       }
     }
-    return '';
+    return new Date().toLocaleDateString();
   };
 
   const [startDate, setStartDate] = useState<string>(getInitialStartDate());
