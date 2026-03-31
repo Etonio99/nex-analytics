@@ -14,7 +14,7 @@ Nex Analytics walks you through a step-by-step process to pull data from NexHeal
 
 ## Download
 
-Pre-built installers are available on the [Releases](https://github.com/Etonio99/nex-available-slots-report/releases) page. Download the appropriate installer for your platform (macOS, Windows, or Linux) and run it.
+Pre-built installers are available on the [Releases](https://github.com/Etonio99/nex-available-slots-report/releases) page. Download the appropriate installer for your platform (macOS, Windows, or Linux) and run it. We also have a Google Doc on the installation process [here](https://docs.google.com/document/d/1pRn-u8xyxDq_oh1KilF7SvBKnl27MgreTsOWl7USqlY/edit?usp=sharing).
 
 ## How to Use
 
