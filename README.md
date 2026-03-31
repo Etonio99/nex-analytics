@@ -10,7 +10,7 @@ Nex Analytics walks you through a step-by-step process to pull data from NexHeal
 
 **Current reports:**
 
-- **Available Slots** — Export available appointment slots across selected locations for a given date range and appointment type.
+- **Available Slots** — Export available appointment slot counts across selected locations for a given date range and appointment type.
 
 ## Download
 
