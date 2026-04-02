@@ -25,7 +25,11 @@ const CheckApiKey = (props: ProcessSubPageProps) => {
   };
 
   return (
-    <ProcessorSubPage title="Check API Key" appActions={props.appActions}>
+    <ProcessorSubPage
+      title="Check API Key"
+      description="Please enter your API key below. Your API key will be stored using your operating system's secure credential store and will only be accessed when using this application."
+      appActions={props.appActions}
+    >
       <Input
         label="API Key"
         placeholder="eCWxyomJxd56bv8.xPL7gwq..."
