@@ -1,4 +1,6 @@
-# Nex Analytics
+# <img width="28" height="28" alt="app-icon" src="https://github.com/user-attachments/assets/b036e8fe-bbc8-4770-b459-a2db87fe7363" /> Nex Analytics
+
+
 
 A desktop application for exporting reports from [NexHealth](https://nexhealth.com) practices. Built with [Tauri](https://tauri.app) (Rust + React).
 
