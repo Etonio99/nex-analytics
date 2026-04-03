@@ -33,7 +33,7 @@ const EnterStartDate = (props: ProcessSubPageProps) => {
   return (
     <ProcessorSubPage
       title="Enter Start Date"
-      description="Enter the date you would like start checking for available slots."
+      description="Enter the date you would like start your analytics from."
       appActions={props.appActions}
     >
       <Input
