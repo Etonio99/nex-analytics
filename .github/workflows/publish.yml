@@ -51,7 +51,7 @@ jobs:
         with:
           tagName: nex-analytics-v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version.
           releaseName: 'Nex Analytics v__VERSION__'
-          releaseBody: 'See the assets to download this version and install.'
+          releaseBody: 'Please see the assets section to download and install this version.'
           releaseDraft: true
           prerelease: false
           args: ${{ matrix.args }}
