@@ -24,6 +24,7 @@ export default tseslint.config(
       'prettier/prettier': ['error', { semi: true }],
       semi: ['error', 'always'],
       'no-unused-vars': 'off',
+      'no-case-declarations': 'off',
 
       '@typescript-eslint/no-unused-vars': [
         'error',
