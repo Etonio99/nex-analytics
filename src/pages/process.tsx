@@ -2,22 +2,16 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { listen } from '@tauri-apps/api/event';
-import CheckApiKey from './processor-sub-pages/check-api-key';
 import { ProcessorAdvanceResult } from '../types/processor-advance-result';
 import { useProcessor } from '../hooks/useProcessor';
 import { ProcessStep } from '../types/processor-steps';
-import EnterSubdomain from './processor-sub-pages/enter-subdomain';
 import { ProcessorDataUpdate } from '../types/processor-data-update';
 import { useAppState } from '../hooks/useAppState';
 import { AppData } from '../types/app-data';
-import SelectLocations from './processor-sub-pages/select-locations';
-import EnterDays from './processor-sub-pages/enter-days';
-import EnterAppointmentTypeName from './processor-sub-pages/enter-appointment-type-name';
-import Confirmation from './processor-sub-pages/confirmation';
 import Loading from './processor-sub-pages/loading';
 import Complete from './processor-sub-pages/complete';
 import { useNotificationContext } from '../components/contexts/notification-context';
-import EnterStartDate from './processor-sub-pages/enter-start-date';
+import InputRequired from './processor-sub-pages/input-required';
 
 interface ProcessProps {
   navigate: (page: string) => void;
@@ -64,9 +58,8 @@ const Process = (props: ProcessProps) => {
     if (!interrupt) return;
 
     if (
-      interrupt.type === 'PERMISSION_DENIED' &&
-      interrupt.resolutionData?.type === 'STRING' &&
-      interrupt.resolutionData.payload === 'subdomain'
+      interrupt.type === 'ERROR' &&
+      interrupt.payload.type === 'PERMISSION_DENIED'
     ) {
       notify(
         'Permission Denied',
@@ -130,49 +123,16 @@ const Process = (props: ProcessProps) => {
     }
 
     switch (stepName) {
-      case 'CheckApiKey':
-        return (
-          <CheckApiKey appActions={appActions} advanceResult={advanceResult} />
-        );
-      case 'EnterSubdomain':
-        return (
-          <EnterSubdomain
-            appActions={appActions}
-            advanceResult={advanceResult}
-          />
-        );
-      case 'SelectLocations':
-        return (
-          <SelectLocations
-            appActions={appActions}
-            advanceResult={advanceResult}
-          />
-        );
-      case 'EnterStartDate':
-        return (
-          <EnterStartDate
-            appActions={appActions}
-            advanceResult={advanceResult}
-          />
-        );
-      case 'EnterDays':
-        return (
-          <EnterDays appActions={appActions} advanceResult={advanceResult} />
-        );
-      case 'EnterAppointmentTypeName':
-        return (
-          <EnterAppointmentTypeName
-            appActions={appActions}
-            advanceResult={advanceResult}
-          />
-        );
-      case 'Confirmation':
-        return (
-          <Confirmation appActions={appActions} advanceResult={advanceResult} />
-        );
       case 'Complete':
         return (
           <Complete appActions={appActions} advanceResult={advanceResult} />
+        );
+      default:
+        return (
+          <InputRequired
+            appActions={appActions}
+            advanceResult={advanceResult}
+          />
         );
     }
   };

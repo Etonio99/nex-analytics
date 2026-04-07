@@ -1,4 +1,4 @@
-use std::{collections::HashMap, fmt::format, fs, path::PathBuf, sync::Arc};
+use std::{collections::HashMap, fs, path::PathBuf, sync::Arc};
 
 use async_trait::async_trait;
 use chrono::{Duration, Local, NaiveDate};
@@ -6,7 +6,7 @@ use rust_xlsxwriter::{
     workbook::Workbook, Color, Format, FormatAlign, FormatBorder, Table, TableColumn,
     TableFunction, XlsxError,
 };
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use tauri::{Emitter, Manager};
 
 use crate::{
@@ -31,7 +31,8 @@ use crate::{
             process_steps::ProcessStep,
             processor_advance_result::ProcessorAdvanceResult,
             processor_interrupt::{
-                InterruptResolutionData, LocationResolutionData, ProcessorInterrupt,
+                InputData, InputField, ProcessorError, ProcessorInputRequest, ProcessorInterrupt,
+                SelectData, SelectOption,
             },
         },
     },
@@ -47,7 +48,7 @@ pub struct AppointmentSlotsProcessor {
     pub api_call_count: u32,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct AppointmentSlotsProcessorData {
     pub confirmed: Option<bool>,
     pub locations: Option<Vec<Location>>,
@@ -82,6 +83,37 @@ impl AppointmentSlotsProcessor {
         }
     }
 
+    fn create_error(error: ProcessorError) -> ProcessorInterrupt {
+        ProcessorInterrupt::Error(error)
+    }
+
+    fn create_input_request(
+        title: &str,
+        description: &str,
+        input_field: InputField,
+    ) -> ProcessorInterrupt {
+        ProcessorInterrupt::InputRequired(ProcessorInputRequest {
+            title: title.into(),
+            description: description.into(),
+            input_field,
+        })
+    }
+
+    fn locations_to_select_options(locations: &[Location]) -> Vec<SelectOption> {
+        locations
+            .iter()
+            .map(|l| SelectOption {
+                title: l.name.clone(),
+                subtitle: [l.city.as_deref(), l.state.as_deref()]
+                    .iter()
+                    .filter_map(|s| *s)
+                    .collect::<Vec<_>>()
+                    .join(", "),
+                key: l.id,
+            })
+            .collect()
+    }
+
     async fn step(
         &mut self,
         client: &NexApiClient,
@@ -95,23 +127,28 @@ impl AppointmentSlotsProcessor {
         match self.current_step {
             ProcessStep::CheckApiKey => {
                 if get_api_key()
-                    .map_err(|e| {
-                        ProcessorInterrupt::InternalError(InterruptResolutionData::String(
-                            e.to_string(),
-                        ))
-                    })?
+                    .map_err(|_| Self::create_error(ProcessorError::InternalError))?
                     .is_none()
                 {
-                    return Err(ProcessorInterrupt::MissingApiKey);
+                    return Err(Self::create_input_request(
+                        "API Key Required",
+                        "Please enter your Nex API key to continue.",
+                        InputField {
+                            data: InputData::String(None),
+                            label: Some("API Key".into()),
+                            placeholder: Some("Enter your API key".into()),
+                            description: None,
+                            key: "api_key".into(),
+                        },
+                    ));
                 }
 
-                let response = client.get_authenticates().await.map_err(|e| {
-                    ProcessorInterrupt::InternalError(InterruptResolutionData::String(
-                        e.to_string(),
-                    ))
-                })?;
+                let response = client
+                    .get_authenticates()
+                    .await
+                    .map_err(|_| Self::create_error(ProcessorError::InternalError))?;
                 if !response.code {
-                    return Err(ProcessorInterrupt::InvalidApiKey);
+                    return Err(Self::create_error(ProcessorError::InvalidApiKey));
                 }
 
                 self.current_step = ProcessStep::EnterSubdomain;
@@ -120,7 +157,18 @@ impl AppointmentSlotsProcessor {
                 let guard = self.app_state.data.lock().await;
 
                 if guard.subdomain.is_none() {
-                    return Err(ProcessorInterrupt::MissingSubdomain(None));
+                    return Err(Self::create_input_request(
+                        "Enter Subdomain",
+                        "Please enter your institution's subdomain.",
+                        InputField {
+                            data: InputData::String(None),
+                            label: Some("Subdomain".into()),
+
+                            placeholder: Some("your-subdomain".into()),
+                            description: None,
+                            key: "subdomain".into(),
+                        },
+                    ));
                 }
 
                 self.current_step = ProcessStep::FetchLocations;
@@ -130,7 +178,17 @@ impl AppointmentSlotsProcessor {
                     let guard = self.app_state.data.lock().await;
 
                     let Some(subdomain) = guard.subdomain.as_ref() else {
-                        return Err(ProcessorInterrupt::MissingSubdomain(None));
+                        return Err(Self::create_input_request(
+                            "Enter Subdomain",
+                            "Please enter your institution's subdomain.",
+                            InputField {
+                                data: InputData::String(None),
+                                label: Some("Subdomain".into()),
+                                placeholder: Some("your-subdomain".into()),
+                                description: None,
+                                key: "subdomain".into(),
+                            },
+                        ));
                     };
 
                     let locations_response = client
@@ -139,11 +197,7 @@ impl AppointmentSlotsProcessor {
                             inactive: false,
                         })
                         .await
-                        .map_err(|e| {
-                            ProcessorInterrupt::InternalError(InterruptResolutionData::String(
-                                e.to_string(),
-                            ))
-                        })?;
+                        .map_err(|_| Self::create_error(ProcessorError::InternalError))?;
 
                     self.api_call_count += 1;
                     if !locations_response.code {
@@ -151,11 +205,7 @@ impl AppointmentSlotsProcessor {
                             if e.contains(
                                 &"You don't have access to perform this action.".to_string(),
                             ) {
-                                let permission_type = &Some("subdomain".to_string());
-                                return Err(ProcessorInterrupt::PermissionDenied(
-                                    self.wrap_str(permission_type)
-                                        .unwrap_or(InterruptResolutionData::None),
-                                ));
+                                return Err(Self::create_error(ProcessorError::PermissionDenied));
                             }
                         }
                     }
@@ -163,7 +213,7 @@ impl AppointmentSlotsProcessor {
                     if let Some(institution_locations) = locations_response.data {
                         self.data.locations = Some(institution_locations[0].locations.clone());
                     } else {
-                        return Err(ProcessorInterrupt::NoLocationsFound);
+                        return Err(Self::create_error(ProcessorError::NoLocationsFound));
                     }
                 }
 
@@ -171,30 +221,69 @@ impl AppointmentSlotsProcessor {
             }
             ProcessStep::SelectLocations => {
                 let Some(_) = self.data.selected_location_ids else {
-                    return Err(ProcessorInterrupt::LocationRequired(Some(
-                        InterruptResolutionData::Locations(LocationResolutionData {
-                            locations: self.data.locations.clone().unwrap_or_default(),
-                            selected_location_ids: None,
-                        }),
-                    )));
+                    let locations = self.data.locations.clone().unwrap_or_default();
+                    return Err(Self::create_input_request(
+                        "Select Locations",
+                        "Select one or more locations to run the report for.",
+                        InputField {
+                            data: InputData::Select(SelectData {
+                                options: Self::locations_to_select_options(&locations),
+                                selected_keys: None,
+                            }),
+                            label: Some("Locations".into()),
+                            placeholder: None,
+                            description: None,
+                            key: "selected_location_ids".into(),
+                        },
+                    ));
                 };
                 self.current_step = ProcessStep::EnterStartDate;
             }
             ProcessStep::EnterStartDate => {
                 let Some(_) = self.data.start_date else {
-                    return Err(ProcessorInterrupt::MissingStartDate(None));
+                    return Err(Self::create_input_request(
+                        "Enter Start Date",
+                        "Enter the start date for the report timeframe.",
+                        InputField {
+                            data: InputData::Date(None),
+                            label: Some("Start Date".into()),
+                            placeholder: Some("YYYY-MM-DD".into()),
+                            description: None,
+                            key: "start_date".into(),
+                        },
+                    ));
                 };
                 self.current_step = ProcessStep::EnterDays;
             }
             ProcessStep::EnterDays => {
                 let Some(_) = self.data.days else {
-                    return Err(ProcessorInterrupt::MissingDays(None));
+                    return Err(Self::create_input_request(
+                        "Enter Days",
+                        "Enter the number of days to include in the report.",
+                        InputField {
+                            data: InputData::Number(None),
+                            label: Some("Days".into()),
+                            placeholder: Some("e.g. 30".into()),
+                            description: None,
+                            key: "days".into(),
+                        },
+                    ));
                 };
                 self.current_step = ProcessStep::EnterAppointmentTypeName;
             }
             ProcessStep::EnterAppointmentTypeName => {
                 let Some(_) = self.data.appointment_type_name else {
-                    return Err(ProcessorInterrupt::MissingAppointmentTypeName(None));
+                    return Err(Self::create_input_request(
+                        "Enter Appointment Type",
+                        "Enter the name of the appointment type to report on.",
+                        InputField {
+                            data: InputData::String(None),
+                            label: Some("Appointment Type Name".into()),
+                            placeholder: Some("e.g. New Patient".into()),
+                            description: None,
+                            key: "appointment_type_name".into(),
+                        },
+                    ));
                 };
                 self.current_step = ProcessStep::Confirmation;
             }
@@ -202,20 +291,28 @@ impl AppointmentSlotsProcessor {
                 if !self.data.confirmed.unwrap_or(false) {
                     let guard = self.app_state.data.lock().await;
 
-                    let locations_count = self
-                        .data
-                        .selected_location_ids
-                        .as_ref()
-                        .map(|v| v.len() as u32);
+                    let confirmation_data = DataConfirmation {
+                        subdomain: guard.subdomain.clone(),
+                        locations_count: self
+                            .data
+                            .selected_location_ids
+                            .as_ref()
+                            .map(|v| v.len() as u32),
+                        start_date: self.data.start_date.clone(),
+                        days: self.data.days,
+                        appointment_type_name: self.data.appointment_type_name.clone(),
+                    };
 
-                    return Err(ProcessorInterrupt::NeedsConfirmation(
-                        InterruptResolutionData::Confirmation(DataConfirmation {
-                            subdomain: guard.subdomain.clone(),
-                            locations_count,
-                            start_date: self.data.start_date.clone(),
-                            days: self.data.days,
-                            appointment_type_name: self.data.appointment_type_name.clone(),
-                        }),
+                    return Err(Self::create_input_request(
+                        "Confirm Report",
+                        "Please confirm that all of the provided information is correct before proceeding.",
+                        InputField {
+                            data: InputData::Confirm(confirmation_data),
+                            label: Some("Confirm".into()),
+                            placeholder: None,
+                            description: None,
+                            key: "confirmed".into(),
+                        },
                     ));
                 }
                 self.current_step = ProcessStep::Processing;
@@ -227,13 +324,19 @@ impl AppointmentSlotsProcessor {
             ProcessStep::Complete => {
                 if !matches!(self.data.completion_acknowledged, Some(true)) {
                     let Some(file_path) = &self.file_path else {
-                        return Err(ProcessorInterrupt::InternalError(
-                            InterruptResolutionData::String("File path was None".into()),
-                        ));
+                        return Err(Self::create_error(ProcessorError::InternalError));
                     };
 
-                    return Err(ProcessorInterrupt::AcknowledgeCompletion(
-                        InterruptResolutionData::String(file_path.to_string()),
+                    return Err(Self::create_input_request(
+                        "Report Complete",
+                        &format!("The report has been saved to: {}", file_path),
+                        InputField {
+                            data: InputData::AcknowledgeCompletion,
+                            label: None,
+                            placeholder: None,
+                            description: None,
+                            key: "completion_acknowledged".into(),
+                        },
                     ));
                 }
             }
@@ -245,47 +348,83 @@ impl AppointmentSlotsProcessor {
 
     async fn get_interrupt_for_current_step(&self) -> ProcessorInterrupt {
         match self.current_step {
-            ProcessStep::CheckApiKey => ProcessorInterrupt::MissingApiKey,
+            ProcessStep::CheckApiKey => Self::create_input_request(
+                "API Key Required",
+                "Please enter your Nex API key to continue.",
+                InputField {
+                    data: InputData::String(None),
+                    label: Some("API Key".into()),
+                    placeholder: Some("API key".into()),
+                    description: None,
+                    key: "api_key".into(),
+                },
+            ),
             ProcessStep::EnterSubdomain => {
                 let guard = self.app_state.data.lock().await;
-
-                if guard.subdomain.is_none() {
-                    return ProcessorInterrupt::MissingSubdomain(None);
-                }
-
-                ProcessorInterrupt::MissingSubdomain(self.wrap_str(&guard.subdomain))
-            }
-            ProcessStep::SelectLocations => ProcessorInterrupt::LocationRequired(Some(
-                InterruptResolutionData::Locations(LocationResolutionData {
-                    locations: self.data.locations.clone().unwrap_or_default(),
-                    selected_location_ids: self.data.selected_location_ids.clone(),
-                }),
-            )),
-            ProcessStep::EnterStartDate => {
-                ProcessorInterrupt::MissingStartDate(self.wrap_str(&self.data.start_date))
-            }
-            ProcessStep::EnterDays => {
-                ProcessorInterrupt::MissingDays(self.wrap_num(self.data.days))
-            }
-            ProcessStep::EnterAppointmentTypeName => {
-                ProcessorInterrupt::MissingAppointmentTypeName(
-                    self.wrap_str(&self.data.appointment_type_name),
+                Self::create_input_request(
+                    "Enter Subdomain",
+                    "Please enter your institution's subdomain.",
+                    InputField {
+                        data: InputData::String(guard.subdomain.clone()),
+                        label: Some("Subdomain".into()),
+                        placeholder: Some("your-practice-subdomain".into()),
+                        description: None,
+                        key: "subdomain".into(),
+                    },
                 )
             }
-            _ => ProcessorInterrupt::InternalError(InterruptResolutionData::String(
-                "Unknown step".into(),
-            )),
+            ProcessStep::SelectLocations => {
+                let locations = self.data.locations.clone().unwrap_or_default();
+                Self::create_input_request(
+                    "Select Locations",
+                    "Select the locations you want to collect analytics from. Note that additional API calls will be made for each selected location.",
+                    InputField {
+                        data: InputData::Select(SelectData {
+                            options: Self::locations_to_select_options(&locations),
+                            selected_keys: self.data.selected_location_ids.clone(),
+                        }),
+                        label: Some("Select any number of locations below".into()),
+                        placeholder: None,
+                        description: None,
+                        key: "selected_location_ids".into(),
+                    },
+                )
+            }
+            ProcessStep::EnterStartDate => Self::create_input_request(
+                "Enter Start Date",
+                "Enter the start date for the report timeframe.",
+                InputField {
+                    data: InputData::Date(self.data.start_date.clone()),
+                    label: Some("Start Date".into()),
+                    placeholder: Some("YYYY-MM-DD".into()),
+                    description: None,
+                    key: "start_date".into(),
+                },
+            ),
+            ProcessStep::EnterDays => Self::create_input_request(
+                "Enter Days",
+                "Enter the number of days to include in the report.",
+                InputField {
+                    data: InputData::Number(self.data.days),
+                    label: Some("Days".into()),
+                    placeholder: Some("e.g. 30".into()),
+                    description: None,
+                    key: "days".into(),
+                },
+            ),
+            ProcessStep::EnterAppointmentTypeName => Self::create_input_request(
+                "Enter Appointment Type",
+                "Enter the name of the appointment type to report on.",
+                InputField {
+                    data: InputData::String(self.data.appointment_type_name.clone()),
+                    label: Some("Appointment Type Name".into()),
+                    placeholder: Some("e.g. New Patient Cleaning".into()),
+                    description: None,
+                    key: "appointment_type_name".into(),
+                },
+            ),
+            _ => Self::create_error(ProcessorError::InternalError),
         }
-    }
-
-    fn wrap_str(&self, value: &Option<String>) -> Option<InterruptResolutionData> {
-        value
-            .as_ref()
-            .map(|s| InterruptResolutionData::String(s.clone()))
-    }
-
-    fn wrap_num(&self, value: Option<u32>) -> Option<InterruptResolutionData> {
-        value.map(InterruptResolutionData::Number)
     }
 
     async fn process(
@@ -298,32 +437,25 @@ impl AppointmentSlotsProcessor {
         let subdomain = {
             let guard = self.app_state.data.lock().await;
             let Some(subdomain) = guard.subdomain.as_ref() else {
-                return Err(ProcessorInterrupt::MissingSubdomain(None));
+                return Err(Self::create_error(ProcessorError::InternalError));
             };
             subdomain.clone()
         };
 
         let Some(appointment_type_name) = self.data.appointment_type_name.as_ref() else {
-            return Err(ProcessorInterrupt::InternalError(
-                InterruptResolutionData::String("Appointment type name is missing".into()),
-            ));
+            return Err(Self::create_error(ProcessorError::InternalError));
         };
 
         let Some(start_date) = self.data.start_date.as_ref() else {
-            return Err(ProcessorInterrupt::InternalError(
-                InterruptResolutionData::String("Start date is missing".into()),
-            ));
+            return Err(Self::create_error(ProcessorError::InternalError));
         };
 
         let Some(days) = self.data.days.as_ref() else {
-            return Err(ProcessorInterrupt::InternalError(
-                InterruptResolutionData::String("Days is missing".into()),
-            ));
+            return Err(Self::create_error(ProcessorError::InternalError));
         };
 
-        let start_date = NaiveDate::parse_from_str(start_date, "%Y-%m-%d").map_err(|e| {
-            ProcessorInterrupt::InternalError(InterruptResolutionData::String(e.to_string()))
-        })?;
+        let start_date = NaiveDate::parse_from_str(start_date, "%Y-%m-%d")
+            .map_err(|_| Self::create_error(ProcessorError::InternalError))?;
 
         let mut counter = 0;
         if let Some(location_ids) = self.data.selected_location_ids.clone() {
@@ -338,11 +470,7 @@ impl AppointmentSlotsProcessor {
                             location_ids.len()
                         ),
                     )
-                    .map_err(|e| {
-                        ProcessorInterrupt::InternalError(InterruptResolutionData::String(
-                            e.to_string(),
-                        ))
-                    });
+                    .map_err(|_| Self::create_error(ProcessorError::InternalError));
 
                 let appointment_types_response = client
                     .get_appointment_types(AppointmentTypesQuery {
@@ -350,24 +478,16 @@ impl AppointmentSlotsProcessor {
                         location_id: *location_id,
                     })
                     .await
-                    .map_err(|e| {
-                        ProcessorInterrupt::InternalError(InterruptResolutionData::String(
-                            e.to_string(),
-                        ))
-                    })?;
+                    .map_err(|_| Self::create_error(ProcessorError::InternalError))?;
                 self.api_call_count += 1;
 
                 if !appointment_types_response.code {
                     println!("API call failed: {:#?}", appointment_types_response);
-                    return Err(ProcessorInterrupt::InternalError(
-                        InterruptResolutionData::None,
-                    ));
+                    return Err(Self::create_error(ProcessorError::InternalError));
                 }
 
                 let Some(appointment_types) = appointment_types_response.data else {
-                    return Err(ProcessorInterrupt::InternalError(
-                        InterruptResolutionData::String("Appointment types value is None".into()),
-                    ));
+                    return Err(Self::create_error(ProcessorError::InternalError));
                 };
 
                 let matched_appointment_type = appointment_types
@@ -392,24 +512,16 @@ impl AppointmentSlotsProcessor {
                         per_page: 300,
                     })
                     .await
-                    .map_err(|e| {
-                        ProcessorInterrupt::InternalError(InterruptResolutionData::String(
-                            e.to_string(),
-                        ))
-                    })?;
+                    .map_err(|_| Self::create_error(ProcessorError::InternalError))?;
                 self.api_call_count += 1;
 
                 if !providers_response.code {
                     println!("API call failed: {:#?}", providers_response);
-                    return Err(ProcessorInterrupt::InternalError(
-                        InterruptResolutionData::None,
-                    ));
+                    return Err(Self::create_error(ProcessorError::InternalError));
                 }
 
                 let Some(providers_list) = providers_response.data else {
-                    return Err(ProcessorInterrupt::InternalError(
-                        InterruptResolutionData::String("Providers value is None".into()),
-                    ));
+                    return Err(Self::create_error(ProcessorError::InternalError));
                 };
 
                 let provider_ids = providers_list.iter().map(|p| p.id).collect();
@@ -424,11 +536,7 @@ impl AppointmentSlotsProcessor {
                         provider_ids,
                     })
                     .await
-                    .map_err(|e| {
-                        ProcessorInterrupt::InternalError(InterruptResolutionData::String(
-                            e.to_string(),
-                        ))
-                    })?;
+                    .map_err(|_| Self::create_error(ProcessorError::InternalError))?;
                 self.api_call_count += 1;
 
                 if !appointment_slots_response.code {
@@ -490,9 +598,7 @@ impl AppointmentSlotsProcessor {
         let save_path = app
             .path()
             .document_dir()
-            .map_err(|e| {
-                ProcessorInterrupt::InternalError(InterruptResolutionData::String(e.to_string()))
-            })?
+            .map_err(|_| Self::create_error(ProcessorError::InternalError))?
             .join("Nex Analytics")
             .join("Available Slots");
 
@@ -504,9 +610,7 @@ impl AppointmentSlotsProcessor {
             &available_slot_data,
         )
         .await
-        .map_err(|e| {
-            ProcessorInterrupt::InternalError(InterruptResolutionData::String(e.to_string()))
-        })?;
+        .map_err(|_| Self::create_error(ProcessorError::InternalError))?;
 
         Ok(())
     }
@@ -655,33 +759,18 @@ impl Processor for AppointmentSlotsProcessor {
     }
 
     fn update_data(&mut self, data: serde_json::Value) -> Result<(), String> {
-        let input: AppointmentSlotsProcessorData = serde_json::from_value(data)
-            .map_err(|e| format!("Invalid data for Appointment Slots Processor: {}", e))?;
+        let mut current = serde_json::to_value(&self.data).map_err(|e| e.to_string())?;
 
-        if let Some(c) = input.confirmed {
-            self.data.confirmed = Some(c);
+        if let (Some(current_obj), Some(update_obj)) = (current.as_object_mut(), data.as_object()) {
+            for (key, value) in update_obj {
+                if !value.is_null() {
+                    current_obj.insert(key.clone(), value.clone());
+                }
+            }
         }
-        if let Some(l) = input.locations {
-            self.data.locations = Some(l);
-        }
-        if let Some(l) = input.selected_location_ids {
-            self.data.selected_location_ids = Some(l);
-        }
-        if let Some(s) = input.start_date {
-            self.data.start_date = Some(s);
-        }
-        if let Some(d) = input.days {
-            self.data.days = Some(d);
-        }
-        if let Some(a) = input.appointment_type_name {
-            self.data.appointment_type_name = Some(a);
-        }
-        if let Some(o) = input.operatories {
-            self.data.operatories = Some(o);
-        }
-        if let Some(p) = input.providers {
-            self.data.providers = Some(p);
-        }
+
+        self.data = serde_json::from_value(current)
+            .map_err(|e| format!("Invalid data for Appointment Slots Processor: {}", e))?;
 
         Ok(())
     }
