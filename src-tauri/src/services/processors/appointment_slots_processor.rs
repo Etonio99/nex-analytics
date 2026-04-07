@@ -130,17 +130,7 @@ impl AppointmentSlotsProcessor {
                     .map_err(|_| Self::create_error(ProcessorError::InternalError))?
                     .is_none()
                 {
-                    return Err(Self::create_input_request(
-                        "API Key Required",
-                        "Please enter your Nex API key to continue.",
-                        InputField {
-                            data: InputData::String(None),
-                            label: Some("API Key".into()),
-                            placeholder: Some("Enter your API key".into()),
-                            description: None,
-                            key: "api_key".into(),
-                        },
-                    ));
+                    return Err(self.get_interrupt_for_current_step().await);
                 }
 
                 let response = client
@@ -154,21 +144,13 @@ impl AppointmentSlotsProcessor {
                 self.current_step = ProcessStep::EnterSubdomain;
             }
             ProcessStep::EnterSubdomain => {
-                let guard = self.app_state.data.lock().await;
+                let has_subdomain = {
+                    let guard = self.app_state.data.lock().await;
+                    guard.subdomain.is_some()
+                };
 
-                if guard.subdomain.is_none() {
-                    return Err(Self::create_input_request(
-                        "Enter Subdomain",
-                        "Please enter your institution's subdomain.",
-                        InputField {
-                            data: InputData::String(None),
-                            label: Some("Subdomain".into()),
-
-                            placeholder: Some("your-subdomain".into()),
-                            description: None,
-                            key: "subdomain".into(),
-                        },
-                    ));
+                if !has_subdomain {
+                    return Err(self.get_interrupt_for_current_step().await);
                 }
 
                 self.current_step = ProcessStep::FetchLocations;
@@ -178,17 +160,9 @@ impl AppointmentSlotsProcessor {
                     let guard = self.app_state.data.lock().await;
 
                     let Some(subdomain) = guard.subdomain.as_ref() else {
-                        return Err(Self::create_input_request(
-                            "Enter Subdomain",
-                            "Please enter your institution's subdomain.",
-                            InputField {
-                                data: InputData::String(None),
-                                label: Some("Subdomain".into()),
-                                placeholder: Some("your-subdomain".into()),
-                                description: None,
-                                key: "subdomain".into(),
-                            },
-                        ));
+                        drop(guard);
+                        self.current_step = ProcessStep::EnterSubdomain;
+                        return Err(self.get_interrupt_for_current_step().await);
                     };
 
                     let locations_response = client
@@ -221,99 +195,31 @@ impl AppointmentSlotsProcessor {
             }
             ProcessStep::SelectLocations => {
                 let Some(_) = self.data.selected_location_ids else {
-                    let locations = self.data.locations.clone().unwrap_or_default();
-                    return Err(Self::create_input_request(
-                        "Select Locations",
-                        "Select one or more locations to run the report for.",
-                        InputField {
-                            data: InputData::Select(SelectData {
-                                options: Self::locations_to_select_options(&locations),
-                                selected_keys: None,
-                            }),
-                            label: Some("Locations".into()),
-                            placeholder: None,
-                            description: None,
-                            key: "selected_location_ids".into(),
-                        },
-                    ));
+                    return Err(self.get_interrupt_for_current_step().await);
                 };
                 self.current_step = ProcessStep::EnterStartDate;
             }
             ProcessStep::EnterStartDate => {
                 let Some(_) = self.data.start_date else {
-                    return Err(Self::create_input_request(
-                        "Enter Start Date",
-                        "Enter the start date for the report timeframe.",
-                        InputField {
-                            data: InputData::Date(None),
-                            label: Some("Start Date".into()),
-                            placeholder: Some("YYYY-MM-DD".into()),
-                            description: None,
-                            key: "start_date".into(),
-                        },
-                    ));
+                    return Err(self.get_interrupt_for_current_step().await);
                 };
                 self.current_step = ProcessStep::EnterDays;
             }
             ProcessStep::EnterDays => {
                 let Some(_) = self.data.days else {
-                    return Err(Self::create_input_request(
-                        "Enter Days",
-                        "Enter the number of days to include in the report.",
-                        InputField {
-                            data: InputData::Number(None),
-                            label: Some("Days".into()),
-                            placeholder: Some("e.g. 30".into()),
-                            description: None,
-                            key: "days".into(),
-                        },
-                    ));
+                    return Err(self.get_interrupt_for_current_step().await);
                 };
                 self.current_step = ProcessStep::EnterAppointmentTypeName;
             }
             ProcessStep::EnterAppointmentTypeName => {
                 let Some(_) = self.data.appointment_type_name else {
-                    return Err(Self::create_input_request(
-                        "Enter Appointment Type",
-                        "Enter the name of the appointment type to report on.",
-                        InputField {
-                            data: InputData::String(None),
-                            label: Some("Appointment Type Name".into()),
-                            placeholder: Some("e.g. New Patient".into()),
-                            description: None,
-                            key: "appointment_type_name".into(),
-                        },
-                    ));
+                    return Err(self.get_interrupt_for_current_step().await);
                 };
                 self.current_step = ProcessStep::Confirmation;
             }
             ProcessStep::Confirmation => {
                 if !self.data.confirmed.unwrap_or(false) {
-                    let guard = self.app_state.data.lock().await;
-
-                    let confirmation_data = DataConfirmation {
-                        subdomain: guard.subdomain.clone(),
-                        locations_count: self
-                            .data
-                            .selected_location_ids
-                            .as_ref()
-                            .map(|v| v.len() as u32),
-                        start_date: self.data.start_date.clone(),
-                        days: self.data.days,
-                        appointment_type_name: self.data.appointment_type_name.clone(),
-                    };
-
-                    return Err(Self::create_input_request(
-                        "Confirm Report",
-                        "Please confirm that all of the provided information is correct before proceeding.",
-                        InputField {
-                            data: InputData::Confirm(confirmation_data),
-                            label: Some("Confirm".into()),
-                            placeholder: None,
-                            description: None,
-                            key: "confirmed".into(),
-                        },
-                    ));
+                    return Err(self.get_interrupt_for_current_step().await);
                 }
                 self.current_step = ProcessStep::Processing;
             }
@@ -323,24 +229,12 @@ impl AppointmentSlotsProcessor {
             }
             ProcessStep::Complete => {
                 if !matches!(self.data.completion_acknowledged, Some(true)) {
-                    let Some(file_path) = &self.file_path else {
+                    if self.file_path.is_none() {
                         return Err(Self::create_error(ProcessorError::InternalError));
-                    };
-
-                    return Err(Self::create_input_request(
-                        "Report Complete",
-                        &format!("The report has been saved to: {}", file_path),
-                        InputField {
-                            data: InputData::AcknowledgeCompletion,
-                            label: None,
-                            placeholder: None,
-                            description: None,
-                            key: "completion_acknowledged".into(),
-                        },
-                    ));
+                    }
+                    return Err(self.get_interrupt_for_current_step().await);
                 }
             }
-            _ => return Ok(false),
         }
 
         Ok(true)
@@ -423,6 +317,48 @@ impl AppointmentSlotsProcessor {
                     key: "appointment_type_name".into(),
                 },
             ),
+            ProcessStep::Confirmation => {
+                let guard = self.app_state.data.lock().await;
+                let confirmation_data = DataConfirmation {
+                    subdomain: guard.subdomain.clone(),
+                    locations_count: self
+                        .data
+                        .selected_location_ids
+                        .as_ref()
+                        .map(|v| v.len() as u32),
+                    start_date: self.data.start_date.clone(),
+                    days: self.data.days,
+                    appointment_type_name: self.data.appointment_type_name.clone(),
+                };
+                Self::create_input_request(
+                    "Confirm Report",
+                    "Please confirm that all of the provided information is correct before proceeding.",
+                    InputField {
+                        data: InputData::Confirm(confirmation_data),
+                        label: Some("Confirm".into()),
+                        placeholder: None,
+                        description: None,
+                        key: "confirmed".into(),
+                    },
+                )
+            }
+            ProcessStep::Complete => {
+                let description = format!(
+                    "The report has been saved to: {}",
+                    self.file_path.as_deref().unwrap_or("unknown path")
+                );
+                Self::create_input_request(
+                    "Report Complete",
+                    &description,
+                    InputField {
+                        data: InputData::AcknowledgeCompletion,
+                        label: None,
+                        placeholder: None,
+                        description: None,
+                        key: "completion_acknowledged".into(),
+                    },
+                )
+            }
             _ => Self::create_error(ProcessorError::InternalError),
         }
     }
