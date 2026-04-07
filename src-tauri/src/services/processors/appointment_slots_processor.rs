@@ -2,10 +2,7 @@ use std::{collections::HashMap, fs, path::PathBuf, sync::Arc};
 
 use async_trait::async_trait;
 use chrono::{Duration, Local, NaiveDate};
-use rust_xlsxwriter::{
-    workbook::Workbook, Color, Format, FormatAlign, FormatBorder, Table, TableColumn,
-    TableFunction, XlsxError,
-};
+use rust_xlsxwriter::{workbook::Workbook, Format, Table, TableColumn, TableFunction, XlsxError};
 use serde::{Deserialize, Serialize};
 use tauri::{Emitter, Manager};
 
