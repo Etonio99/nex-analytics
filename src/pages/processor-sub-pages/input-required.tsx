@@ -25,10 +25,6 @@ const InputRequired = (props: ProcessSubPageProps) => {
     return null;
   }
 
-  const finish = async () => {
-    await props.appActions.finish();
-  };
-
   const continueProcess = async () => {
     if (
       props.advanceResult?.interrupt?.type !== 'INPUT_REQUIRED' ||
@@ -239,6 +235,10 @@ const InputRequired = (props: ProcessSubPageProps) => {
       default:
         return null;
     }
+  };
+
+  const finish = async () => {
+    await props.appActions.finish();
   };
 
   const cancel = async () => {
