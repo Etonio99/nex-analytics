@@ -1,31 +1,53 @@
-import { NexLocation } from './api/locations';
+// import { NexLocation } from './api/locations';
 import { DataConfirmation } from './data-confirmation';
 
-export interface ProcessorInterrupt {
-  type:
-    | 'MISSING_API_KEY'
-    | 'INVALID_API_KEY'
-    | 'MISSING_SUBDOMAIN'
-    | 'LOCATION_REQUIRED'
-    | 'NO_LOCATIONS_FOUND'
-    | 'MISSING_START_DATE'
-    | 'MISSING_DAYS'
-    | 'MISSING_APPOINTMENT_TYPE_NAME'
-    | 'INTERNAL_ERROR'
-    | 'NEEDS_CONFIRMATION'
-    | 'PERMISSION_DENIED'
-    | 'NOT_FOUND';
-  resolutionData?: InterruptResolutionData;
-}
+export type ProcessorInterrupt =
+  | { type: 'ERROR'; payload: ProcessorError }
+  | { type: 'INPUT_REQUIRED'; payload: InterruptPayload };
 
-type InterruptResolutionData =
+type ProcessorError =
+  | { type: 'INVALID_API_KEY' }
+  | { type: 'NO_LOCATIONS_FOUND' }
+  | { type: 'PERMISSION_DENIED' }
+  | { type: 'INTERNAL_ERROR' };
+
+type InterruptPayload = {
+  title: string;
+  description: string;
+  input_field: InputField;
+};
+
+type InputField = {
+  label: string;
+  placeholder?: string;
+  description?: string;
+  data: InputData;
+  key: string;
+  required: boolean;
+  continue_button_label?: string;
+};
+
+type InputData =
   | { type: 'STRING'; payload: string }
+  | { type: 'DATE'; payload: string }
   | { type: 'NUMBER'; payload: number }
-  | { type: 'LOCATIONS'; payload: LocationResolutionData }
-  | { type: 'CONFIRMATION'; payload: DataConfirmation }
-  | { type: 'None'; payload: null };
+  | { type: 'MULTI_STRING'; payload: MultiStringPayload }
+  | { type: 'SELECT'; payload: SelectPayload }
+  | { type: 'CONFIRM'; payload: DataConfirmation }
+  | { type: 'ACKNOWLEDGE_COMPLETION'; payload: string };
 
-type LocationResolutionData = {
-  locations: NexLocation[];
-  selected_location_ids?: number[];
+type MultiStringPayload = {
+  options: string[];
+  selected_strings?: string[];
+};
+
+type SelectPayload = {
+  options: SelectOption[];
+  selected_keys?: number[];
+};
+
+type SelectOption = {
+  title: string;
+  subtitle?: string;
+  key: number;
 };

@@ -5,7 +5,7 @@ import prettier from 'eslint-plugin-prettier/recommended';
 
 export default tseslint.config(
   {
-    ignores: ['dist', 'src-tauri', 'node_modules'],
+    ignores: ['dist/**', 'src-tauri/**', 'node_modules/**'],
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,
@@ -24,6 +24,7 @@ export default tseslint.config(
       'prettier/prettier': ['error', { semi: true }],
       semi: ['error', 'always'],
       'no-unused-vars': 'off',
+      'no-case-declarations': 'off',
 
       '@typescript-eslint/no-unused-vars': [
         'error',

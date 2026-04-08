@@ -1,7 +1,13 @@
-use crate::{api::{NexApiClient, types::{locations::InstitutionLocations, nex_api::NexApiResponse}}, services::controller::Controller};
+use crate::{
+    api::{
+        types::{locations::InstitutionLocations, nex_api::NexApiResponse},
+        NexApiClient,
+    },
+    services::controller::Controller,
+};
 
 #[tauri::command]
-pub async fn get_locations (
+pub async fn get_locations(
     controller: tauri::State<'_, Controller>,
     client: tauri::State<'_, NexApiClient>,
     inactive: bool,
