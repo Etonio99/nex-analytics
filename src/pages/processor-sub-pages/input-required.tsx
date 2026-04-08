@@ -5,12 +5,12 @@ import ProcessorSubPage from './processor-sub-page';
 import Button from '../../components/button';
 import MultiSelect, { MultiSelectItem } from '../../components/multi-select';
 import { BiRightArrowAlt, BiSolidKey } from 'react-icons/bi';
-// import { useNotificationContext } from '../../components/contexts/notification-context';
+import { useNotificationContext } from '../../components/contexts/notification-context';
 import Input from '../../components/input';
 import Confirmation from '../../components/confirmation';
 
 const InputRequired = (props: ProcessSubPageProps) => {
-  // const { notify } = useNotificationContext();
+  const { notify } = useNotificationContext();
   const [value, setValue] = useState<string | undefined>();
   const [selectValue, setselectValue] = useState<Record<string, boolean>>({});
 
@@ -40,14 +40,26 @@ const InputRequired = (props: ProcessSubPageProps) => {
         returnValue = value !== undefined ? Number(value) : undefined;
         break;
       case 'SELECT':
-        returnValue = Object.entries(selectValue)
+        const selections = Object.entries(selectValue)
           .filter(([_, selected]) => selected)
           .map(([key]) => Number(key));
+        returnValue = selections.length > 0 ? selections : undefined;
         break;
       case 'CONFIRM':
         returnValue = true;
         break;
     }
+    if (
+      props.advanceResult.interrupt.payload.input_field.required &&
+      !returnValue
+    ) {
+      notify(
+        'Input Required',
+        `"${props.advanceResult.interrupt.payload.input_field.label}" is required`
+      );
+      return;
+    }
+
     const appDataKeys = ['subdomain'];
     if (appDataKeys.includes(key)) {
       await props.appActions.updateAppData({ [key]: returnValue } as AppData);

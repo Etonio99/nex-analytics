@@ -23,6 +23,7 @@ type InputField = {
   description?: string;
   data: InputData;
   key: string;
+  required: boolean;
 };
 
 type InputData =

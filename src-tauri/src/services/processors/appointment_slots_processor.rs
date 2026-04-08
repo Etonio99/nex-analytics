@@ -33,7 +33,7 @@ use crate::{
             },
         },
     },
-    utils::app_state::AppState,
+    utils::{app_state::AppState, format_location_address},
 };
 
 pub struct AppointmentSlotsProcessor {
@@ -101,11 +101,7 @@ impl AppointmentSlotsProcessor {
             .iter()
             .map(|l| SelectOption {
                 title: l.name.clone(),
-                subtitle: [l.city.as_deref(), l.state.as_deref()]
-                    .iter()
-                    .filter_map(|s| *s)
-                    .collect::<Vec<_>>()
-                    .join(", "),
+                subtitle: format_location_address(l),
                 key: l.id,
             })
             .collect()
@@ -245,9 +241,10 @@ impl AppointmentSlotsProcessor {
                 InputField {
                     data: InputData::String(None),
                     label: Some("API Key".into()),
-                    placeholder: Some("API key".into()),
+                    placeholder: Some("eCWxyomJxd56bv8.xPL7gwq...".into()),
                     description: None,
                     key: "api_key".into(),
+                    required: true,
                 },
             ),
             ProcessStep::EnterSubdomain => {
@@ -261,6 +258,7 @@ impl AppointmentSlotsProcessor {
                         placeholder: Some("your-practice-subdomain".into()),
                         description: None,
                         key: "subdomain".into(),
+                        required: true,
                     },
                 )
             }
@@ -274,10 +272,11 @@ impl AppointmentSlotsProcessor {
                             options: Self::locations_to_select_options(&locations),
                             selected_keys: self.data.selected_location_ids.clone(),
                         }),
-                        label: Some("Select any number of locations below".into()),
+                        label: Some("Locations".into()),
                         placeholder: None,
                         description: None,
                         key: "selected_location_ids".into(),
+                        required: true,
                     },
                 )
             }
@@ -290,6 +289,7 @@ impl AppointmentSlotsProcessor {
                     placeholder: Some("YYYY-MM-DD".into()),
                     description: None,
                     key: "start_date".into(),
+                    required: true,
                 },
             ),
             ProcessStep::EnterDays => Self::create_input_request(
@@ -301,6 +301,7 @@ impl AppointmentSlotsProcessor {
                     placeholder: Some("e.g. 30".into()),
                     description: None,
                     key: "days".into(),
+                    required: true,
                 },
             ),
             ProcessStep::EnterAppointmentTypeName => Self::create_input_request(
@@ -312,6 +313,7 @@ impl AppointmentSlotsProcessor {
                     placeholder: Some("e.g. New Patient Cleaning".into()),
                     description: None,
                     key: "appointment_type_name".into(),
+                    required: true,
                 },
             ),
             ProcessStep::Confirmation => {
@@ -336,6 +338,7 @@ impl AppointmentSlotsProcessor {
                         placeholder: None,
                         description: None,
                         key: "confirmed".into(),
+                        required: true,
                     },
                 )
             }
@@ -353,6 +356,7 @@ impl AppointmentSlotsProcessor {
                         placeholder: None,
                         description: None,
                         key: "completion_acknowledged".into(),
+                        required: true,
                     },
                 )
             }
