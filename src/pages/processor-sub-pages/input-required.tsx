@@ -193,9 +193,26 @@ const InputRequired = (props: ProcessSubPageProps) => {
       }
   }, []);
 
+  const getTitleIcon = () => {
+    if (
+      props.advanceResult?.interrupt?.type !== 'INPUT_REQUIRED' ||
+      !props.advanceResult?.interrupt?.payload
+    ) {
+      return null;
+    }
+
+    switch (props.advanceResult.interrupt.payload.input_field.data.type) {
+      case 'CONFIRM':
+        return <img src="nexie/nexie-search.png" className="pixelated h-10" />;
+      default:
+        return null;
+    }
+  };
+
   return (
     <ProcessorSubPage
       title={props.advanceResult.interrupt.payload.title}
+      titleIcon={getTitleIcon()}
       description={props.advanceResult.interrupt.payload.description}
       appActions={props.appActions}
     >
