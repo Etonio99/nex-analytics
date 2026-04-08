@@ -24,6 +24,7 @@ type InputField = {
   data: InputData;
   key: string;
   required: boolean;
+  continue_button_label?: string;
 };
 
 type InputData =

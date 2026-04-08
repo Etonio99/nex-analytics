@@ -245,6 +245,7 @@ impl AppointmentSlotsProcessor {
                     description: None,
                     key: "api_key".into(),
                     required: true,
+                    continue_button_label: None,
                 },
             ),
             ProcessStep::EnterSubdomain => {
@@ -259,6 +260,7 @@ impl AppointmentSlotsProcessor {
                         description: None,
                         key: "subdomain".into(),
                         required: true,
+                        continue_button_label: None,
                     },
                 )
             }
@@ -277,6 +279,7 @@ impl AppointmentSlotsProcessor {
                         description: None,
                         key: "selected_location_ids".into(),
                         required: true,
+                        continue_button_label: None
                     },
                 )
             }
@@ -290,6 +293,7 @@ impl AppointmentSlotsProcessor {
                     description: None,
                     key: "start_date".into(),
                     required: true,
+                    continue_button_label: None,
                 },
             ),
             ProcessStep::EnterDays => Self::create_input_request(
@@ -302,6 +306,7 @@ impl AppointmentSlotsProcessor {
                     description: None,
                     key: "days".into(),
                     required: true,
+                    continue_button_label: None,
                 },
             ),
             ProcessStep::EnterAppointmentTypeName => Self::create_input_request(
@@ -314,6 +319,7 @@ impl AppointmentSlotsProcessor {
                     description: None,
                     key: "appointment_type_name".into(),
                     required: true,
+                    continue_button_label: None,
                 },
             ),
             ProcessStep::Confirmation => {
@@ -339,6 +345,7 @@ impl AppointmentSlotsProcessor {
                         description: None,
                         key: "confirmed".into(),
                         required: true,
+                        continue_button_label: Some("Confirm".into())
                     },
                 )
             }
@@ -352,6 +359,7 @@ impl AppointmentSlotsProcessor {
                     description: None,
                     key: "completion_acknowledged".into(),
                     required: true,
+                    continue_button_label: Some("Finish".into()),
                 },
             ),
             _ => Self::create_error(ProcessorError::InternalError),

@@ -52,6 +52,7 @@ pub struct InputField {
     pub description: Option<String>,
     pub key: String,
     pub required: bool,
+    pub continue_button_label: Option<String>,
 }
 
 // The optional value is a prefill or required data to create the input

@@ -256,6 +256,10 @@ const InputRequired = (props: ProcessSubPageProps) => {
     props.appActions.finish();
   };
 
+  const continueButtonLabel =
+    props.advanceResult.interrupt.payload.input_field.continue_button_label ??
+    'Save';
+
   return (
     <ProcessorSubPage
       title={props.advanceResult.interrupt.payload.title}
@@ -272,7 +276,11 @@ const InputRequired = (props: ProcessSubPageProps) => {
           'CONFIRM' && (
           <Button label="Cancel" style="tertiary" onClick={cancel} />
         )}
-        <Button label="Save" style="primary" onClick={continueProcess} />
+        <Button
+          label={continueButtonLabel}
+          style="primary"
+          onClick={continueProcess}
+        />
       </div>
     </ProcessorSubPage>
   );
