@@ -342,24 +342,18 @@ impl AppointmentSlotsProcessor {
                     },
                 )
             }
-            ProcessStep::Complete => {
-                let description = format!(
-                    "The report has been saved to: {}",
-                    self.file_path.as_deref().unwrap_or("unknown path")
-                );
-                Self::create_input_request(
-                    "Report Complete",
-                    &description,
-                    InputField {
-                        data: InputData::AcknowledgeCompletion,
-                        label: None,
-                        placeholder: None,
-                        description: None,
-                        key: "completion_acknowledged".into(),
-                        required: true,
-                    },
-                )
-            }
+            ProcessStep::Complete => Self::create_input_request(
+                "Report Complete",
+                "Your report has been completed and was saved to the following location:",
+                InputField {
+                    data: InputData::AcknowledgeCompletion(self.file_path.clone()),
+                    label: None,
+                    placeholder: None,
+                    description: None,
+                    key: "completion_acknowledged".into(),
+                    required: true,
+                },
+            ),
             _ => Self::create_error(ProcessorError::InternalError),
         }
     }

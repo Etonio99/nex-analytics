@@ -4,13 +4,17 @@ import { AppData } from '../../types/app-data';
 import ProcessorSubPage from './processor-sub-page';
 import Button from '../../components/button';
 import MultiSelect, { MultiSelectItem } from '../../components/multi-select';
-import { BiRightArrowAlt, BiSolidKey } from 'react-icons/bi';
+import { BiLinkExternal, BiRightArrowAlt, BiSolidKey } from 'react-icons/bi';
 import { useNotificationContext } from '../../components/contexts/notification-context';
 import Input from '../../components/input';
 import Confirmation from '../../components/confirmation';
+import { useModalContext } from '../../components/contexts/modal-context';
+import useFileSystem from '../../hooks/useFileSystem';
 
 const InputRequired = (props: ProcessSubPageProps) => {
   const { notify } = useNotificationContext();
+  const { confirm } = useModalContext();
+  const { revealFileOrDirectory } = useFileSystem();
   const [value, setValue] = useState<string | undefined>();
   const [selectValue, setselectValue] = useState<Record<string, boolean>>({});
 
@@ -20,6 +24,10 @@ const InputRequired = (props: ProcessSubPageProps) => {
   ) {
     return null;
   }
+
+  const finish = async () => {
+    await props.appActions.finish();
+  };
 
   const continueProcess = async () => {
     if (
@@ -46,6 +54,7 @@ const InputRequired = (props: ProcessSubPageProps) => {
         returnValue = selections.length > 0 ? selections : undefined;
         break;
       case 'CONFIRM':
+      case 'ACKNOWLEDGE_COMPLETION':
         returnValue = true;
         break;
     }
@@ -66,6 +75,12 @@ const InputRequired = (props: ProcessSubPageProps) => {
     } else {
       await props.appActions.updateProcessorData({ [key]: returnValue });
     }
+
+    if (key === 'completion_acknowledged') {
+      await finish();
+      return;
+    }
+
     await props.appActions.advanceProcessor();
   };
 
@@ -112,7 +127,7 @@ const InputRequired = (props: ProcessSubPageProps) => {
 
         const getNote = () => {
           switch (inputField.key) {
-            case 'subdomain':
+            case 'selected_location_ids':
               return (
                 <p className="text-xs">
                   Not the locations you were expecting?{' '}
@@ -155,6 +170,19 @@ const InputRequired = (props: ProcessSubPageProps) => {
             confirmationData={inputField.data.payload}
             jumpToStep={props.appActions.jumpToStep}
           />
+        );
+      case 'ACKNOWLEDGE_COMPLETION':
+        const path = inputField.data.payload;
+        return (
+          <button
+            onClick={() => revealFileOrDirectory(path)}
+            className="text-green-500 text-left shadow shadow-sandstone-900/20 rounded-md border border-sandstone-300 px-4 pt-2 pb-3 mb-2 hover:bg-sandstone-100 hover:-translate-y-1 transition-transform cursor-pointer relative"
+          >
+            {path}
+            <span className="absolute top-2 right-2 text-sandstone-300">
+              <BiLinkExternal />
+            </span>
+          </button>
         );
     }
   };
@@ -204,9 +232,28 @@ const InputRequired = (props: ProcessSubPageProps) => {
     switch (props.advanceResult.interrupt.payload.input_field.data.type) {
       case 'CONFIRM':
         return <img src="nexie/nexie-search.png" className="pixelated h-10" />;
+      case 'ACKNOWLEDGE_COMPLETION':
+        return (
+          <img src="nexie/nexie-celebrate.png" className="pixelated h-10" />
+        );
       default:
         return null;
     }
+  };
+
+  const cancel = async () => {
+    const confirmed = await confirm({
+      title: "Are you sure you'd like to cancel?",
+      description: 'You will have to start from the beginning if you leave.',
+      cancelLabel: 'Nevermind',
+      confirmLabel: "I'm sure",
+    });
+
+    if (!confirmed) {
+      return;
+    }
+
+    props.appActions.finish();
   };
 
   return (
@@ -221,6 +268,10 @@ const InputRequired = (props: ProcessSubPageProps) => {
         <p className="text-sandstone-300 italic">
           {props.advanceResult.interrupt.payload?.input_field.description}
         </p>
+        {props.advanceResult.interrupt.payload.input_field.data.type ===
+          'CONFIRM' && (
+          <Button label="Cancel" style="tertiary" onClick={cancel} />
+        )}
         <Button label="Save" style="primary" onClick={continueProcess} />
       </div>
     </ProcessorSubPage>

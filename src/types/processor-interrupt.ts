@@ -32,7 +32,8 @@ type InputData =
   | { type: 'NUMBER'; payload: number }
   | { type: 'MULTI_STRING'; payload: MultiStringPayload }
   | { type: 'SELECT'; payload: SelectPayload }
-  | { type: 'CONFIRM'; payload: DataConfirmation };
+  | { type: 'CONFIRM'; payload: DataConfirmation }
+  | { type: 'ACKNOWLEDGE_COMPLETION'; payload: string };
 
 type MultiStringPayload = {
   options: string[];

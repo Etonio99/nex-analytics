@@ -9,7 +9,6 @@ import { ProcessorDataUpdate } from '../types/processor-data-update';
 import { useAppState } from '../hooks/useAppState';
 import { AppData } from '../types/app-data';
 import Loading from './processor-sub-pages/loading';
-import Complete from './processor-sub-pages/complete';
 import { useNotificationContext } from '../components/contexts/notification-context';
 import InputRequired from './processor-sub-pages/input-required';
 
@@ -122,19 +121,9 @@ const Process = (props: ProcessProps) => {
       return <Loading message={progressMessage} />;
     }
 
-    switch (stepName) {
-      case 'Complete':
-        return (
-          <Complete appActions={appActions} advanceResult={advanceResult} />
-        );
-      default:
-        return (
-          <InputRequired
-            appActions={appActions}
-            advanceResult={advanceResult}
-          />
-        );
-    }
+    return (
+      <InputRequired appActions={appActions} advanceResult={advanceResult} />
+    );
   };
 
   return (

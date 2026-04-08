@@ -64,7 +64,7 @@ pub enum InputData {
     Number(Option<u32>),
     Select(SelectData),
     Confirm(DataConfirmation),
-    AcknowledgeCompletion,
+    AcknowledgeCompletion(Option<String>), // This Option<String> is for the file path
 }
 
 #[derive(Serialize, Debug, Clone)]
