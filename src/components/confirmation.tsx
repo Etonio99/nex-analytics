@@ -1,7 +1,7 @@
-import { snakeCaseToTitleCase } from '../../utils/string-helper';
 import { BiEdit } from 'react-icons/bi';
-import { ProcessStep } from '../../types/processor-steps';
-import { DataConfirmation } from '../../types/data-confirmation';
+import { DataConfirmation } from '../types/data-confirmation';
+import { ProcessStep } from '../types/processor-steps';
+import { snakeCaseToTitleCase } from '../utils/string-helper';
 
 interface ConfirmationProps {
   confirmationData: DataConfirmation;

@@ -7,7 +7,7 @@ import MultiSelect, { MultiSelectItem } from '../../components/multi-select';
 import { BiRightArrowAlt, BiSolidKey } from 'react-icons/bi';
 // import { useNotificationContext } from '../../components/contexts/notification-context';
 import Input from '../../components/input';
-import Confirmation from './confirmation';
+import Confirmation from '../../components/confirmation';
 
 const InputRequired = (props: ProcessSubPageProps) => {
   // const { notify } = useNotificationContext();
@@ -65,9 +65,8 @@ const InputRequired = (props: ProcessSubPageProps) => {
       return null;
     }
 
-    const title = props.advanceResult.interrupt.payload?.input_field.label;
-    const inputFieldType =
-      props.advanceResult.interrupt.payload.input_field.data.type;
+    const inputField = props.advanceResult.interrupt.payload?.input_field;
+    const inputFieldType = inputField.data.type;
 
     switch (inputFieldType) {
       case 'STRING':
@@ -87,8 +86,8 @@ const InputRequired = (props: ProcessSubPageProps) => {
         return (
           <>
             <Input
-              label={title}
-              placeholder="eCWxyomJxd56bv8.xPL7gwq..."
+              label={inputField.label}
+              placeholder={inputField.placeholder ?? ''}
               icon={<BiSolidKey />}
               value={value}
               type={getInputType()}
@@ -97,27 +96,37 @@ const InputRequired = (props: ProcessSubPageProps) => {
           </>
         );
       case 'SELECT':
-        const selectData =
-          props.advanceResult.interrupt.payload.input_field.data.payload;
+        const selectData = inputField.data.payload;
+
+        const getNote = () => {
+          switch (inputField.key) {
+            case 'subdomain':
+              return (
+                <p className="text-xs">
+                  Not the locations you were expecting?{' '}
+                  <span
+                    className="text-teal-500 cursor-pointer"
+                    onClick={() =>
+                      props.appActions.jumpToStep('EnterSubdomain')
+                    }
+                  >
+                    Check your subdomain
+                    <BiRightArrowAlt className="inline-block" />
+                  </span>
+                </p>
+              );
+            default:
+              return null;
+          }
+        };
 
         return (
           <MultiSelect
-            description={title}
+            title={inputField.label}
+            description={inputField.description}
             value={selectValue}
             onChange={setselectValue}
             items={selectData.options.map((item) => {
-              // const addressParts = [
-              //   location.street_address,
-              //   location.street_address_2,
-              //   location.city,
-              //   location.state
-              //     ? `${location.state} ${location.zip_code}`
-              //     : location.zip_code,
-              // ].filter(Boolean);
-
-              // const description =
-              //   addressParts.join(', ') || 'No address listed';
-
               return {
                 label: item.title,
                 description: item.subtitle,
@@ -125,26 +134,13 @@ const InputRequired = (props: ProcessSubPageProps) => {
                 displayUniqueKey: true,
               } as MultiSelectItem;
             })}
-            note={
-              <p className="text-xs">
-                Not the locations you were expecting?{' '}
-                <span
-                  className="text-teal-500 cursor-pointer"
-                  onClick={() => props.appActions.jumpToStep('EnterSubdomain')}
-                >
-                  Check your subdomain
-                  <BiRightArrowAlt className="inline-block" />
-                </span>
-              </p>
-            }
+            note={getNote()}
           />
         );
       case 'CONFIRM':
         return (
           <Confirmation
-            confirmationData={
-              props.advanceResult.interrupt.payload.input_field.data.payload
-            }
+            confirmationData={inputField.data.payload}
             jumpToStep={props.appActions.jumpToStep}
           />
         );
